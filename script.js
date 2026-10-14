@@ -1,4 +1,15 @@
 (()=>{
+  const enhanceHero=()=>{
+    const heroImage=document.querySelector('.hero-media img');
+    if(!heroImage)return;
+    heroImage.src='hero-main-hq.webp';
+    heroImage.srcset='hero-main-hq.webp 1672w';
+    heroImage.sizes='100vw';
+    heroImage.loading='eager';
+    heroImage.decoding='async';
+    heroImage.setAttribute('fetchpriority','high');
+  };
+
   const loadBaseScript=()=>new Promise(resolve=>{
     const base=document.createElement('script');
     base.src='script-base.js';
@@ -68,6 +79,7 @@
     });
   };
 
+  enhanceHero();
   loadBaseScript().then(()=>{
     enhanceResults();
     enhanceAtmosphere();
