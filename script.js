@@ -2,8 +2,8 @@
   const enhanceHero=()=>{
     const heroImage=document.querySelector('.hero-media img');
     if(!heroImage)return;
-    heroImage.src='hero-main-hq.webp';
-    heroImage.srcset='hero-main-hq.webp 1672w';
+    heroImage.src='assets/hero-main-hq.webp';
+    heroImage.srcset='assets/hero-main-hq.webp 1672w';
     heroImage.sizes='100vw';
     heroImage.loading='eager';
     heroImage.decoding='async';
