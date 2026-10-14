@@ -1,53 +1,75 @@
+(()=>{
+  const loadBaseScript=()=>new Promise(resolve=>{
+    const base=document.createElement('script');
+    base.src='script-base.js';
+    base.onload=resolve;
+    base.onerror=resolve;
+    document.body.appendChild(base);
+  });
 
-const menuToggle=document.querySelector('.menu-toggle');
-const mainNav=document.querySelector('.main-nav');
-menuToggle?.addEventListener('click',()=>{const open=mainNav.classList.toggle('open');menuToggle.setAttribute('aria-expanded',String(open));});
-document.querySelectorAll('.main-nav a').forEach(link=>link.addEventListener('click',()=>{mainNav.classList.remove('open');menuToggle?.setAttribute('aria-expanded','false');}));
-const header=document.querySelector('.site-header');
-const updateHeader=()=>header?.classList.toggle('scrolled',window.scrollY>42); updateHeader(); window.addEventListener('scroll',updateHeader,{passive:true});
+  const enhanceResults=()=>{
+    const works=document.getElementById('works');
+    if(!works)return;
+    const cards=Array.from({length:7},(_,i)=>{
+      const n=String(i+1).padStart(2,'0');
+      return `<article class="result-video-card">
+        <div class="result-video-frame">
+          <video class="result-video" controls playsinline preload="metadata" poster="assets/result-${n}-poster.webp" aria-label="Результат работы VALERI HAIR STUDIO ${i+1}">
+            <source src="assets/result-${n}.mp4" type="video/mp4">
+          </video>
+          <span class="result-video-number">${n}</span>
+        </div>
+        <div class="result-video-caption"><span>Результат работы</span><strong>VALERI HAIR STUDIO</strong></div>
+      </article>`;
+    }).join('');
 
-const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');observer.unobserve(entry.target);}}),{threshold:.08});
-document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+    works.innerHTML=`<div class="section-pad">
+      <div class="section-head light">
+        <div><p class="eyebrow">Результаты</p><h2>Волосы, к которым хочется прикасаться</h2></div>
+        <p>Реальные результаты работ VALERI HAIR STUDIO. Листайте галерею и запускайте видео, чтобы рассмотреть волосы в движении и увидеть результат ближе.</p>
+      </div>
+      <div class="results-video-gallery" aria-label="Видео с результатами работ VALERI HAIR STUDIO">${cards}</div>
+      <p class="results-swipe-hint">Листайте в сторону · нажмите ▶ для просмотра</p>
+    </div>`;
 
+    const videos=works.querySelectorAll('.result-video');
+    videos.forEach(video=>video.addEventListener('play',()=>{
+      videos.forEach(other=>{if(other!==video&&!other.paused)other.pause();});
+    }));
+    if('IntersectionObserver' in window){
+      const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+        if(!entry.isIntersecting&&!entry.target.paused)entry.target.pause();
+      }),{threshold:.08});
+      videos.forEach(video=>observer.observe(video));
+    }
+  };
 
-const studioGallery=document.querySelector('.studio-gallery');
-const studioPrev=document.querySelector('.studio-prev');
-const studioNext=document.querySelector('.studio-next');
-function studioScrollAmount(){const card=studioGallery?.querySelector('.studio-shot');if(!card)return 320;return card.getBoundingClientRect().width+16;}
-studioPrev?.addEventListener('click',()=>studioGallery?.scrollBy({left:-studioScrollAmount(),behavior:'smooth'}));
-studioNext?.addEventListener('click',()=>studioGallery?.scrollBy({left:studioScrollAmount(),behavior:'smooth'}));
+  const enhanceAtmosphere=()=>{
+    const gallery=document.querySelector('.studio-gallery');
+    if(!gallery)return;
 
+    gallery.querySelectorAll('figure').forEach(figure=>{
+      const caption=figure.querySelector('figcaption')?.textContent?.trim().toLowerCase();
+      if(caption==='пространство студии')figure.remove();
+    });
 
-const trainingGallery=document.querySelector('.training-gallery');
-const trainingPrev=document.querySelector('.training-prev');
-const trainingNext=document.querySelector('.training-next');
-function trainingScrollAmount(){const card=trainingGallery?.querySelector('figure');if(!card)return 320;return card.getBoundingClientRect().width+14;}
-trainingPrev?.addEventListener('click',()=>trainingGallery?.scrollBy({left:-trainingScrollAmount(),behavior:'smooth'}));
-trainingNext?.addEventListener('click',()=>trainingGallery?.scrollBy({left:trainingScrollAmount(),behavior:'smooth'}));
+    const items=[
+      {src:'assets/atmosphere-coffee.webp',alt:'Горячий кофе и сладкий комплимент для гостей VALERI HAIR STUDIO',caption:'Тёплый кофе'},
+      {src:'assets/atmosphere-studio.webp',alt:'Светлый интерьер VALERI HAIR STUDIO',caption:'Свет студии'},
+      {src:'assets/atmosphere-menu.webp',alt:'Меню комплиментов для гостей VALERI HAIR STUDIO',caption:'Меню комплиментов'}
+    ];
 
-const filters=document.querySelectorAll('.filter'); const workCards=document.querySelectorAll('.work-card');
-filters.forEach(button=>button.addEventListener('click',()=>{filters.forEach(item=>item.classList.remove('active'));button.classList.add('active');const filter=button.dataset.filter;workCards.forEach(card=>card.classList.toggle('hidden',!(filter==='all'||card.dataset.category===filter)));}));
+    items.forEach(item=>{
+      if(gallery.querySelector(`img[src="${item.src}"]`))return;
+      const figure=document.createElement('figure');
+      figure.className='studio-shot';
+      figure.innerHTML=`<img alt="${item.alt}" loading="lazy" src="${item.src}"><figcaption>${item.caption}</figcaption>`;
+      gallery.appendChild(figure);
+    });
+  };
 
-const serviceData={
-  reconstruction:{kicker:'Комплекс №1',title:'Восстановление и реконструкция',lead:'Базовый комплекс глубокого восстановления и питания для сухих, ломких и повреждённых волос. Подходит детям.',groups:[['Если волосы',['сухие и ломкие','повреждены после окрашивания','путаются и трудно расчёсываются','потеряли блеск и мягкость','выглядят тусклыми и безжизненными']],['Что даёт процедура',['глубоко восстанавливает структуру волос','насыщает аминокислотами, белками и витаминами','увлажняет и питает по всей длине','делает волосы мягкими, гладкими и послушными']],['Комплекс включает',['1. Очищение и подготовка волос','2. Глубокое восстановление и питание','3. Закрепление результата и защита']]],price:[['Стоимость','300 BYN'],['Длина более 60 см','доплата до 70 BYN'],['Выраженная густота','доплата до 70 BYN']],note:'Подходит детям, обладателям сухих и повреждённых волос, после кератина/ботокса/окрашивания и для поддержания качества волос между процедурами.'},
-  biotin:{kicker:'Комплекс №2',title:'BIOTIN',lead:'Технология восстановления волос для укрепления длины. Подходит детям и кудрявым волосам.',groups:[['Если волосы',['ломаются по длине','повреждены после окрашивания и осветления','путаются и сложно расчёсываются','стали тонкими и ослабленными','не получается отрастить длину']],['Что даёт процедура',['укрепляет структуру волос изнутри','снижает ломкость и сечение','помогает сохранить и отрастить длину','повышает прочность и эластичность','сохраняет объём без утяжеления','делает волосы лёгкими и рассыпчатыми']],['Активные компоненты',['биотин B7','аминокислоты','protein-комплекс','гидролизованный коллаген','активные восстанавливающие компоненты нового поколения']]],price:[['Стоимость','330 BYN'],['Длина более 60 см','доплата до 70 BYN'],['Выраженная густота','доплата до 70 BYN']]},
-  strotex:{kicker:'Комплекс №3',title:'STROTEX',lead:'Самое мощное восстановление для блонда, пушистых, пористых и сильно повреждённых волос.',highlight:'STROTEX — первая в Беларуси система восстановления волос такого формата.',groups:[['Если волосы',['повреждены окрашиванием или утюжками','пушатся и теряют гладкость','ломаются по длине','выглядят тусклыми и безжизненными','имеют нежелательный жёлтый оттенок после осветления']],['Что даёт процедура',['максимально восстанавливает структуру волос','глубоко уплотняет волос изнутри','уменьшает пушистость и пористость','придаёт гладкость и эффект ламинирования','визуально делает блонд более чистым и ярким','усиливает блеск без утяжеления']],['Комплекс включает',['аминокислотный комплекс','восстановление дисульфидных связей','гиалуроновую кислоту','биоминералы','восстанавливающие компоненты глубокого действия','защитный комплекс для закрепления результата']]],price:[['Стоимость','350 BYN'],['Длина более 60 см','доплата до 70 BYN'],['Выраженная густота','доплата до 70 BYN']],note:'Важно: это не тонирование. Более чистый и яркий визуальный оттенок достигается за счёт глубокого восстановления структуры волос.'},
-  vivabond:{kicker:'Комплекс №4',title:'VIVA BOND™',lead:'Восстановление повреждённых и пушистых волос с разглаживающим и ламинирующим эффектом — без кератина.',highlight:'VIVA BOND™ — первая в Беларуси система восстановления с разглаживающим эффектом.',groups:[['Если волосы',['пушатся при малейшей влажности','выглядят пористыми и неухоженными','повреждены окрашиванием или осветлением','путаются и сложно укладываются','хочется гладкости и блеска без утяжеления']],['Что даёт процедура',['частично убирает пушистость и пористость','создаёт натуральный гладкий эффект без перегружения','уплотняет структуру волос','делает волосы более послушными и ухоженными','сохраняет естественный объём у корней','придаёт интенсивный блеск и эффект ламинирования']],['Комплекс включает',['bond-комплекс нового поколения','аминокислотный комплекс','формирование новых водородных и ионных связей внутри волоса','восстановление повреждённых участков кератиновой структуры','компоненты ультрауплотнения','защитный ламинирующий комплекс']]],price:[['Стоимость','380 BYN'],['Длина более 60 см','доплата до 70 BYN'],['Выраженная густота','доплата до 70 BYN']],note:'Комплекс разглаживает волосы, но не выпрямляет сильный завиток.'},
-  keratin:{kicker:'PRICE LIST',title:'Кератин / ботокс',lead:'Процедура направлена на выпрямление — от лёгкой волны до тугого завитка. Придаёт гладкость, рассыпчатость, блеск и мягкость и помогает сократить время на укладку.',groups:[['Дополнительно',['1 шаг восстановления — в подарок','укрепление волос профессиональной несмываемой сывороткой — в подарок','активные компоненты помогают удерживать влагу и защищают структуру волос']],['Ориентир',['время процедуры: около 3,5–4 часов','эффект: ориентировочно 3–7 месяцев']]],price:[['Короткие — до 30 см','350 BYN'],['Средние — до 50 см','400 BYN'],['Длинные — до 80 см','450 BYN'],['Очень длинные — от 80 см','500 BYN']],note:'Доплата за густоту: 6–7 см — без доплаты; 8–9 см — 30 BYN; 10–11 см — 40 BYN; свыше 12 см — 60 BYN.'},
-  total:{kicker:'PRICE LIST',title:'Тотальная реконструкция',lead:'Две полноценные процедуры в один день: мощное многоступенчатое восстановление волос любой сложности + кератин/ботокс. В комплекс входит премиальный комплекс витаминов A, E и F.',groups:[['Что входит',['многоступенчатое восстановление','кератин / ботокс','премиальный комплекс витаминов A, E, F']]],price:[['Короткие — до 30 см','400 BYN'],['Средние — до 50 см','450 BYN'],['Длинные — до 80 см','500 BYN'],['Очень длинные — от 80 см','600 BYN']],note:'Доплата за густоту: 6–7 см — без доплаты; 8–9 см — 30 BYN; 10–11 см — 40 BYN; свыше 12 см — 60 BYN.'},
-  peeling:{kicker:'Уход за кожей головы',title:'Пилинг кожи головы',lead:'Глубокое очищение кожи головы с терапевтическим уходовым эффектом.',groups:[['Что даёт пилинг',['помогает снять зуд, воспаление и дискомфорт','глубоко очищает кожу головы и продлевает ощущение свежести','улучшает состояние кожи вокруг волосяных фолликулов','уменьшает жирность корней','подготавливает кожу и волосы к последующим процедурам']],['Кому подходит',['при жирной коже головы','при наличии перхоти','если голова быстро загрязняется','при зуде или неприятных ощущениях','при частом использовании стайлинга']]],price:[['Отдельная процедура','80 BYN'],['В дополнение к другой процедуре','40 BYN']]}
-};
-
-const modal=document.getElementById('serviceModal'); const modalTitle=document.getElementById('modalTitle'); const modalKicker=document.getElementById('modalKicker'); const modalLead=document.getElementById('modalLead'); const modalBody=document.getElementById('modalBody');
-function closeModal(){modal?.classList.remove('open');modal?.setAttribute('aria-hidden','true');document.body.style.overflow='';}
-function renderService(key){const s=serviceData[key];if(!s)return;modalKicker.textContent=s.kicker;modalTitle.textContent=s.title;modalLead.textContent=s.lead;let html='';if(s.highlight)html+=`<div class="modal-highlight"><span>Первое в Беларуси</span><p>${s.highlight}</p></div>`;s.groups.forEach(([title,items])=>{html+=`<div class="modal-group"><h4>${title}</h4><ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul></div>`});html+=`<div class="modal-group"><h4>Стоимость</h4><table class="price-table"><tbody>${s.price.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</tbody></table></div>`;if(s.note)html+=`<div class="modal-callout">${s.note}</div>`;modalBody.innerHTML=html;modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
-document.querySelectorAll('.service-open').forEach(button=>button.addEventListener('click',()=>renderService(button.dataset.service)));
-document.querySelectorAll('[data-close-modal]').forEach(el=>el.addEventListener('click',closeModal));
-
-const lightbox=document.getElementById('lightbox'); const lightboxTitle=document.getElementById('lightboxTitle');workCards.forEach(card=>card.addEventListener('click',()=>{lightboxTitle.textContent=card.dataset.title;lightbox.classList.add('open');lightbox.setAttribute('aria-hidden','false');}));document.querySelector('.lightbox-close')?.addEventListener('click',()=>{lightbox.classList.remove('open');lightbox.setAttribute('aria-hidden','true');});lightbox?.addEventListener('click',e=>{if(e.target===lightbox){lightbox.classList.remove('open');lightbox.setAttribute('aria-hidden','true');}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();lightbox?.classList.remove('open');lightbox?.setAttribute('aria-hidden','true');}});
-
-document.querySelectorAll('[data-master-choice]').forEach(link=>link.addEventListener('click',()=>{const select=document.querySelector('select[name="master"]');if(select)select.value=link.dataset.masterChoice;}));
-document.querySelectorAll('[data-service-choice]').forEach(link=>link.addEventListener('click',()=>{const select=document.querySelector('select[name="service"]');if(select)select.value=link.dataset.serviceChoice;}));
-const bookingForm=document.getElementById('bookingForm');bookingForm?.addEventListener('submit',e=>{e.preventDefault();const note=document.getElementById('formNote');note.textContent='Спасибо! Это демонстрация формы. На опубликованном сайте заявку подключим к вашей системе записи или мессенджеру.';note.style.color='#796455';});
-
+  loadBaseScript().then(()=>{
+    enhanceResults();
+    enhanceAtmosphere();
+  });
+})();
