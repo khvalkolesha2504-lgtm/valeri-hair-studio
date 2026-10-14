@@ -10,6 +10,18 @@
     heroImage.setAttribute('fetchpriority','high');
   };
 
+  const enhanceNavigation=()=>{
+    document.querySelectorAll('a[href="#top"]').forEach(link=>{
+      link.addEventListener('click',event=>{
+        event.preventDefault();
+        window.scrollTo({top:0,left:0,behavior:'smooth'});
+        document.querySelector('.main-nav')?.classList.remove('open');
+        document.querySelector('.menu-toggle')?.setAttribute('aria-expanded','false');
+        if(history.replaceState)history.replaceState(null,'',location.pathname+location.search);
+      });
+    });
+  };
+
   const loadBaseScript=()=>new Promise(resolve=>{
     const base=document.createElement('script');
     base.src='script-base.js';
@@ -167,7 +179,7 @@
 
     gallery.querySelectorAll('figure').forEach(figure=>{
       const caption=figure.querySelector('figcaption')?.textContent?.trim().toLowerCase();
-      if(caption==='пространство студии')figure.remove();
+      if(caption==='пространство студии'||caption==='зона ожидания')figure.remove();
     });
 
     const items=[
@@ -186,6 +198,7 @@
   };
 
   enhanceHero();
+  enhanceNavigation();
   loadBaseScript().then(()=>{
     enhanceResults();
     enhanceAtmosphere();
