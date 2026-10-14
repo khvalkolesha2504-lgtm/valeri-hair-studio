@@ -1,8 +1,5 @@
 # VALERI HAIR STUDIO
 
-Сайт VALERI HAIR STUDIO, Минск.
+Премиальный одностраничный сайт студии VALERI HAIR STUDIO в Минске.
 
-- `index.html` — структура страницы
-- `styles.css` — стили
-- `script.js` — интерактив
-- `assets/` — изображения
+Публикация: GitHub Pages из ветки `main`, корень репозитория.
