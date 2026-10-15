@@ -1,4 +1,49 @@
 (()=>{
+  const enhanceSEO=()=>{
+    document.title='Восстановление волос в Минске — VALERI HAIR STUDIO';
+
+    const description='Восстановление и реконструкция волос в Минске в VALERI HAIR STUDIO. Кератин, ботокс, уход за повреждёнными волосами, индивидуальная диагностика и онлайн-запись.';
+    let metaDescription=document.querySelector('meta[name="description"]');
+    if(!metaDescription){
+      metaDescription=document.createElement('meta');
+      metaDescription.name='description';
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.content=description;
+
+    let canonical=document.querySelector('link[rel="canonical"]');
+    if(!canonical){
+      canonical=document.createElement('link');
+      canonical.rel='canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href='https://valerihairstudio.ru/';
+
+    let favicon=document.querySelector('link[rel~="icon"]');
+    if(!favicon){
+      favicon=document.createElement('link');
+      favicon.rel='icon';
+      document.head.appendChild(favicon);
+    }
+    favicon.type='image/svg+xml';
+    favicon.href='/favicon.svg';
+
+    const upsertMeta=(selector,attr,name,content)=>{
+      let meta=document.querySelector(selector);
+      if(!meta){
+        meta=document.createElement('meta');
+        meta.setAttribute(attr,name);
+        document.head.appendChild(meta);
+      }
+      meta.content=content;
+    };
+    upsertMeta('meta[property="og:title"]','property','og:title','Восстановление волос в Минске — VALERI HAIR STUDIO');
+    upsertMeta('meta[property="og:description"]','property','og:description',description);
+    upsertMeta('meta[property="og:url"]','property','og:url','https://valerihairstudio.ru/');
+    upsertMeta('meta[property="og:type"]','property','og:type','website');
+    upsertMeta('meta[name="robots"]','name','robots','index,follow,max-image-preview:large');
+  };
+
   const enhanceHero=()=>{
     const heroImage=document.querySelector('.hero-media img');
     if(!heroImage)return;
@@ -197,6 +242,7 @@
     });
   };
 
+  enhanceSEO();
   enhanceHero();
   enhanceNavigation();
   loadBaseScript().then(()=>{
