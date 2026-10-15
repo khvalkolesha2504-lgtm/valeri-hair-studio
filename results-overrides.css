@@ -24,6 +24,9 @@
   box-shadow:0 18px 46px rgba(0,0,0,.22);
   isolation:isolate;
 }
+.compare-frame:focus-within{
+  box-shadow:0 0 0 3px rgba(232,222,209,.72),0 18px 46px rgba(0,0,0,.22);
+}
 .compare-layer{
   position:absolute;
   inset:0;
@@ -34,7 +37,8 @@
 .compare-before{background-position:left center}
 .compare-after{
   background-position:right center;
-  clip-path:inset(0 calc(100% - var(--pos)) 0 0);
+  clip-path:inset(0 0 0 var(--pos));
+  will-change:clip-path;
 }
 .compare-label{
   position:absolute;
