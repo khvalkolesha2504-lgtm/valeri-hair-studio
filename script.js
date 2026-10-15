@@ -44,6 +44,15 @@
     upsertMeta('meta[name="robots"]','name','robots','index,follow,max-image-preview:large');
   };
 
+  const enhanceStyles=()=>{
+    if(document.querySelector('link[data-valeri-results-style]'))return;
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='results-overrides.css';
+    link.dataset.valeriResultsStyle='true';
+    document.head.appendChild(link);
+  };
+
   const enhanceHero=()=>{
     const heroImage=document.querySelector('.hero-media img');
     if(!heroImage)return;
@@ -79,42 +88,58 @@
     const works=document.getElementById('works');
     if(!works)return;
 
-    const resultCount=7;
-    const cards=Array.from({length:resultCount},(_,i)=>{
-      const n=String(i+1).padStart(2,'0');
-      return `<article class="result-video-card">
-        <div class="result-video-frame">
-          <video class="result-video" controls playsinline preload="metadata" poster="assets/result-${n}-poster.webp" aria-label="Результат работы VALERI HAIR STUDIO ${i+1}">
-            <source src="assets/result-${n}.mp4" type="video/mp4">
-          </video>
-          <span class="result-video-number">${n}</span>
+    const pairs=Array.from({length:7},(_,index)=>({
+      index,
+      src:`assets/result-compare-${String(index).padStart(2,'0')}.webp`,
+      rightLabel:index===4?'Спустя время':'После'
+    }));
+
+    const cards=pairs.map(item=>{
+      const n=String(item.index+1).padStart(2,'0');
+      const caption=item.index===4?'До / спустя время':'До / после';
+      return `<article class="compare-card">
+        <div class="compare-frame" style="--pos:50%">
+          <div class="compare-layer compare-before" style="background-image:url('${item.src}')"></div>
+          <div class="compare-layer compare-after" style="background-image:url('${item.src}')"></div>
+          <span class="compare-label compare-label-before">До</span>
+          <span class="compare-label compare-label-after">${item.rightLabel}</span>
+          <div class="compare-divider" aria-hidden="true"><span>↔</span></div>
+          <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Сравнить фото до и после — результат ${item.index+1}">
         </div>
-        <div class="result-video-caption"><span>Результат работы</span><strong>VALERI HAIR STUDIO</strong></div>
-        <button class="result-open" type="button" data-result-open="${i}">Смотреть крупно <span>↗</span></button>
+        <div class="compare-caption"><span>Результат ${n}</span><strong>${caption}</strong></div>
       </article>`;
     }).join('');
 
     works.innerHTML=`<div class="section-pad">
       <div class="section-head light">
         <div><p class="eyebrow">Результаты</p><h2>Волосы, к которым хочется прикасаться</h2></div>
-        <p>Реальные результаты работ VALERI HAIR STUDIO. Листайте галерею и открывайте видео крупно, чтобы рассмотреть волосы в движении и увидеть результат ближе.</p>
+        <p>Реальные результаты работ VALERI HAIR STUDIO. Передвигайте ползунок на фотографии, чтобы сравнить состояние волос до процедуры и результат после.</p>
       </div>
       <div class="results-toolbar" aria-label="Управление галереей результатов">
-        <p>Листайте видео</p>
+        <p>Передвигайте ползунок «До / После»</p>
         <div class="results-nav">
-          <button class="results-nav-btn results-prev" type="button" aria-label="Предыдущее видео">←</button>
-          <button class="results-nav-btn results-next" type="button" aria-label="Следующее видео">→</button>
+          <button class="results-nav-btn results-prev" type="button" aria-label="Предыдущий результат">←</button>
+          <button class="results-nav-btn results-next" type="button" aria-label="Следующий результат">→</button>
         </div>
       </div>
-      <div class="results-video-gallery" aria-label="Видео с результатами работ VALERI HAIR STUDIO">${cards}</div>
-      <p class="results-swipe-hint">Свайп на телефоне · стрелки на компьютере · «Смотреть крупно» для полного просмотра</p>
+      <div class="results-compare-gallery" aria-label="Сравнение результатов до и после">${cards}</div>
+      <p class="results-swipe-hint">Двигайте ползунок на фото · листайте галерею · стрелки переключают результаты</p>
     </div>`;
 
-    const gallery=works.querySelector('.results-video-gallery');
+    works.querySelectorAll('.compare-frame').forEach(frame=>{
+      const input=frame.querySelector('.compare-range');
+      if(!input)return;
+      const update=()=>frame.style.setProperty('--pos',`${input.value}%`);
+      input.addEventListener('input',update);
+      input.addEventListener('change',update);
+      update();
+    });
+
+    const gallery=works.querySelector('.results-compare-gallery');
     const prev=works.querySelector('.results-prev');
     const next=works.querySelector('.results-next');
     const cardStep=()=>{
-      const card=gallery?.querySelector('.result-video-card');
+      const card=gallery?.querySelector('.compare-card');
       if(!card)return 300;
       const styles=getComputedStyle(gallery);
       const gap=parseFloat(styles.columnGap||styles.gap||18)||18;
@@ -122,100 +147,6 @@
     };
     prev?.addEventListener('click',()=>gallery?.scrollBy({left:-cardStep(),behavior:'smooth'}));
     next?.addEventListener('click',()=>gallery?.scrollBy({left:cardStep(),behavior:'smooth'}));
-
-    const videos=works.querySelectorAll('.result-video');
-    videos.forEach(video=>video.addEventListener('play',()=>{
-      videos.forEach(other=>{if(other!==video&&!other.paused)other.pause();});
-    }));
-    if('IntersectionObserver' in window){
-      const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
-        if(!entry.isIntersecting&&!entry.target.paused)entry.target.pause();
-      }),{threshold:.08});
-      videos.forEach(video=>observer.observe(video));
-    }
-
-    if(!document.getElementById('resultVideoModal')){
-      document.body.insertAdjacentHTML('beforeend',`
-        <div class="result-modal" id="resultVideoModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Просмотр результата работы">
-          <div class="result-modal-backdrop" data-result-close></div>
-          <div class="result-modal-shell">
-            <button class="result-modal-close" type="button" aria-label="Закрыть видео" data-result-close>×</button>
-            <button class="result-modal-arrow result-modal-prev" type="button" aria-label="Предыдущее видео">←</button>
-            <div class="result-modal-stage">
-              <video class="result-modal-video" controls playsinline preload="metadata"></video>
-              <div class="result-modal-meta">
-                <span class="result-modal-counter">01 / 07</span>
-                <strong>VALERI HAIR STUDIO</strong>
-              </div>
-            </div>
-            <button class="result-modal-arrow result-modal-next" type="button" aria-label="Следующее видео">→</button>
-          </div>
-        </div>`);
-    }
-
-    const modal=document.getElementById('resultVideoModal');
-    const modalVideo=modal?.querySelector('.result-modal-video');
-    const modalCounter=modal?.querySelector('.result-modal-counter');
-    let activeIndex=0;
-    const hqAvailability=new Map();
-
-    const chooseVideoSource=async index=>{
-      const n=String(index+1).padStart(2,'0');
-      const hq=`assets/result-${n}-hq.mp4`;
-      const standard=`assets/result-${n}.mp4`;
-      if(hqAvailability.has(n))return hqAvailability.get(n)?hq:standard;
-      try{
-        const response=await fetch(hq,{method:'HEAD',cache:'no-store'});
-        const available=response.ok;
-        hqAvailability.set(n,available);
-        return available?hq:standard;
-      }catch(_){
-        hqAvailability.set(n,false);
-        return standard;
-      }
-    };
-
-    const showResult=async index=>{
-      if(!modal||!modalVideo)return;
-      activeIndex=(index+resultCount)%resultCount;
-      videos.forEach(video=>{if(!video.paused)video.pause();});
-      const n=String(activeIndex+1).padStart(2,'0');
-      modal.classList.add('open');
-      modal.setAttribute('aria-hidden','false');
-      document.body.classList.add('result-modal-open');
-      modalCounter.textContent=`${n} / ${String(resultCount).padStart(2,'0')}`;
-      modalVideo.poster=`assets/result-${n}-poster.webp`;
-      modalVideo.pause();
-      modalVideo.removeAttribute('src');
-      modalVideo.load();
-      const requestedIndex=activeIndex;
-      const source=await chooseVideoSource(requestedIndex);
-      if(!modal.classList.contains('open')||activeIndex!==requestedIndex)return;
-      modalVideo.src=source;
-      modalVideo.load();
-    };
-
-    const closeModal=()=>{
-      if(!modal||!modalVideo)return;
-      modalVideo.pause();
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden','true');
-      document.body.classList.remove('result-modal-open');
-    };
-
-    works.querySelectorAll('[data-result-open]').forEach(button=>{
-      button.addEventListener('click',()=>showResult(Number(button.dataset.resultOpen)));
-    });
-    modal?.querySelectorAll('[data-result-close]').forEach(button=>button.addEventListener('click',closeModal));
-    modal?.querySelector('.result-modal-prev')?.addEventListener('click',()=>showResult(activeIndex-1));
-    modal?.querySelector('.result-modal-next')?.addEventListener('click',()=>showResult(activeIndex+1));
-
-    document.addEventListener('keydown',event=>{
-      if(!modal?.classList.contains('open'))return;
-      if(event.key==='Escape')closeModal();
-      if(event.key==='ArrowLeft')showResult(activeIndex-1);
-      if(event.key==='ArrowRight')showResult(activeIndex+1);
-    });
   };
 
   const enhanceAtmosphere=()=>{
@@ -225,6 +156,19 @@
     gallery.querySelectorAll('figure').forEach(figure=>{
       const caption=figure.querySelector('figcaption')?.textContent?.trim().toLowerCase();
       if(caption==='пространство студии'||caption==='зона ожидания')figure.remove();
+    });
+
+    const newItems=[
+      {src:'assets/studio-new-01.webp',alt:'Зона ухода и мойка VALERI HAIR STUDIO в Минске',caption:'Зона ухода'},
+      {src:'assets/studio-new-02.webp',alt:'Детали сервиса и фирменный логотип VALERI HAIR STUDIO',caption:'Детали сервиса'}
+    ];
+
+    [...newItems].reverse().forEach(item=>{
+      if(gallery.querySelector(`img[src="${item.src}"]`))return;
+      const figure=document.createElement('figure');
+      figure.className='studio-shot';
+      figure.innerHTML=`<img alt="${item.alt}" loading="lazy" src="${item.src}"><figcaption>${item.caption}</figcaption>`;
+      gallery.insertBefore(figure,gallery.firstElementChild);
     });
 
     const items=[
@@ -242,11 +186,31 @@
     });
   };
 
+  const enhanceTraining=()=>{
+    const hero=document.querySelector('#training .training-hero img');
+    if(hero){
+      hero.src='assets/training-new.webp';
+      hero.alt='Валерия с ученицей после индивидуального обучения в VALERI HAIR STUDIO';
+    }
+
+    const figures=document.querySelectorAll('#training .training-gallery figure');
+    const target=figures[1];
+    const image=target?.querySelector('img');
+    const caption=target?.querySelector('figcaption');
+    if(image){
+      image.src='assets/training-new.webp';
+      image.alt='Валерия с ученицей и сертификатом после индивидуального обучения';
+    }
+    if(caption)caption.textContent='Индивидуальное обучение · Валерия с ученицей';
+  };
+
   enhanceSEO();
+  enhanceStyles();
   enhanceHero();
   enhanceNavigation();
   loadBaseScript().then(()=>{
     enhanceResults();
     enhanceAtmosphere();
+    enhanceTraining();
   });
 })();
