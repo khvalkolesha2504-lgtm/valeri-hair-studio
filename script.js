@@ -44,15 +44,6 @@
     upsertMeta('meta[name="robots"]','name','robots','index,follow,max-image-preview:large');
   };
 
-  const enhanceStyles=()=>{
-    if(document.querySelector('link[data-valeri-results-style]'))return;
-    const link=document.createElement('link');
-    link.rel='stylesheet';
-    link.href='results-overrides.css';
-    link.dataset.valeriResultsStyle='true';
-    document.head.appendChild(link);
-  };
-
   const enhanceHero=()=>{
     const heroImage=document.querySelector('.hero-media img');
     if(!heroImage)return;
@@ -71,18 +62,10 @@
         window.scrollTo({top:0,left:0,behavior:'smooth'});
         document.querySelector('.main-nav')?.classList.remove('open');
         document.querySelector('.menu-toggle')?.setAttribute('aria-expanded','false');
-        if(history.replaceState)history.replaceState(null,'',location.pathname+location.search);
+        history.replaceState?.(null,'',location.pathname+location.search);
       });
     });
   };
-
-  const loadBaseScript=()=>new Promise(resolve=>{
-    const base=document.createElement('script');
-    base.src='script-base.js';
-    base.onload=resolve;
-    base.onerror=resolve;
-    document.body.appendChild(base);
-  });
 
   const enhanceResults=()=>{
     const works=document.getElementById('works');
@@ -95,7 +78,7 @@
     }));
 
     const cards=pairs.map(item=>{
-      const n=String(item.index+1).padStart(2,'0');
+      const number=String(item.index+1).padStart(2,'0');
       const caption=item.index===4?'До / спустя время':'До / после';
       return `<article class="compare-card">
         <div class="compare-frame" style="--pos:50%">
@@ -106,7 +89,7 @@
           <div class="compare-divider" aria-hidden="true"><span>↔</span></div>
           <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Сравнить фото до и после — результат ${item.index+1}">
         </div>
-        <div class="compare-caption"><span>Результат ${n}</span><strong>${caption}</strong></div>
+        <div class="compare-caption"><span>Результат ${number}</span><strong>${caption}</strong></div>
       </article>`;
     }).join('');
 
@@ -129,15 +112,15 @@
     works.querySelectorAll('.compare-frame').forEach(frame=>{
       const input=frame.querySelector('.compare-range');
       if(!input)return;
-      const update=()=>frame.style.setProperty('--pos',`${input.value}%`);
+      const update=()=>{
+        frame.style.setProperty('--pos',`${input.value}%`);
+        input.setAttribute('aria-valuetext',`${input.value}%: слева до, справа ${input.closest('.compare-card')?.querySelector('.compare-label-after')?.textContent?.toLowerCase()||'после'}`);
+      };
       input.addEventListener('input',update);
-      input.addEventListener('change',update);
       update();
     });
 
     const gallery=works.querySelector('.results-compare-gallery');
-    const prev=works.querySelector('.results-prev');
-    const next=works.querySelector('.results-next');
     const cardStep=()=>{
       const card=gallery?.querySelector('.compare-card');
       if(!card)return 300;
@@ -145,8 +128,8 @@
       const gap=parseFloat(styles.columnGap||styles.gap||18)||18;
       return card.getBoundingClientRect().width+gap;
     };
-    prev?.addEventListener('click',()=>gallery?.scrollBy({left:-cardStep(),behavior:'smooth'}));
-    next?.addEventListener('click',()=>gallery?.scrollBy({left:cardStep(),behavior:'smooth'}));
+    works.querySelector('.results-prev')?.addEventListener('click',()=>gallery?.scrollBy({left:-cardStep(),behavior:'smooth'}));
+    works.querySelector('.results-next')?.addEventListener('click',()=>gallery?.scrollBy({left:cardStep(),behavior:'smooth'}));
   };
 
   const enhanceAtmosphere=()=>{
@@ -162,37 +145,29 @@
       {src:'assets/studio-new-01.webp',alt:'Зона ухода и мойка VALERI HAIR STUDIO в Минске',caption:'Зона ухода'},
       {src:'assets/studio-new-02.webp',alt:'Детали сервиса и фирменный логотип VALERI HAIR STUDIO',caption:'Детали сервиса'}
     ];
-
     [...newItems].reverse().forEach(item=>{
       if(gallery.querySelector(`img[src="${item.src}"]`))return;
       const figure=document.createElement('figure');
       figure.className='studio-shot';
-      figure.innerHTML=`<img alt="${item.alt}" loading="lazy" src="${item.src}"><figcaption>${item.caption}</figcaption>`;
+      figure.innerHTML=`<img alt="${item.alt}" loading="lazy" decoding="async" src="${item.src}"><figcaption>${item.caption}</figcaption>`;
       gallery.insertBefore(figure,gallery.firstElementChild);
     });
 
-    const items=[
+    const extraItems=[
       {src:'assets/atmosphere-coffee.webp',alt:'Горячий кофе и сладкий комплимент для гостей VALERI HAIR STUDIO',caption:'Тёплый кофе'},
       {src:'assets/atmosphere-studio.webp',alt:'Светлый интерьер VALERI HAIR STUDIO',caption:'Свет студии'},
       {src:'assets/atmosphere-menu.webp',alt:'Меню комплиментов для гостей VALERI HAIR STUDIO',caption:'Меню комплиментов'}
     ];
-
-    items.forEach(item=>{
+    extraItems.forEach(item=>{
       if(gallery.querySelector(`img[src="${item.src}"]`))return;
       const figure=document.createElement('figure');
       figure.className='studio-shot';
-      figure.innerHTML=`<img alt="${item.alt}" loading="lazy" src="${item.src}"><figcaption>${item.caption}</figcaption>`;
+      figure.innerHTML=`<img alt="${item.alt}" loading="lazy" decoding="async" src="${item.src}"><figcaption>${item.caption}</figcaption>`;
       gallery.appendChild(figure);
     });
   };
 
   const enhanceTraining=()=>{
-    const hero=document.querySelector('#training .training-hero img');
-    if(hero){
-      hero.src='assets/training-new.webp';
-      hero.alt='Валерия с ученицей после индивидуального обучения в VALERI HAIR STUDIO';
-    }
-
     const figures=document.querySelectorAll('#training .training-gallery figure');
     const target=figures[1];
     const image=target?.querySelector('img');
@@ -200,17 +175,24 @@
     if(image){
       image.src='assets/training-new.webp';
       image.alt='Валерия с ученицей и сертификатом после индивидуального обучения';
+      image.decoding='async';
     }
     if(caption)caption.textContent='Индивидуальное обучение · Валерия с ученицей';
   };
 
+  const loadBaseScript=()=>new Promise(resolve=>{
+    const base=document.createElement('script');
+    base.src='script-base.js';
+    base.onload=resolve;
+    base.onerror=resolve;
+    document.body.appendChild(base);
+  });
+
   enhanceSEO();
-  enhanceStyles();
   enhanceHero();
   enhanceNavigation();
-  loadBaseScript().then(()=>{
-    enhanceResults();
-    enhanceAtmosphere();
-    enhanceTraining();
-  });
+  enhanceResults();
+  enhanceAtmosphere();
+  enhanceTraining();
+  loadBaseScript();
 })();
