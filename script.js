@@ -1,6 +1,6 @@
 (()=>{
   const enhanceSEO=()=>{
-    document.title='Восстановление волос в Минске — VALERI HAIR STUDIO';
+    document.title='ВОССТАНОВЛЕНИЕ ВОЛОС | МИНСК';
 
     const description='Восстановление и реконструкция волос в Минске в VALERI HAIR STUDIO. Кератин, ботокс, уход за повреждёнными волосами, индивидуальная диагностика и онлайн-запись.';
     let metaDescription=document.querySelector('meta[name="description"]');
@@ -37,7 +37,7 @@
       }
       meta.content=content;
     };
-    upsertMeta('meta[property="og:title"]','property','og:title','Восстановление волос в Минске — VALERI HAIR STUDIO');
+    upsertMeta('meta[property="og:title"]','property','og:title','ВОССТАНОВЛЕНИЕ ВОЛОС | МИНСК');
     upsertMeta('meta[property="og:description"]','property','og:description',description);
     upsertMeta('meta[property="og:url"]','property','og:url','https://valerihairstudio.ru/');
     upsertMeta('meta[property="og:type"]','property','og:type','website');
