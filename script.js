@@ -25,8 +25,8 @@
       favicon.rel='icon';
       document.head.appendChild(favicon);
     }
-    favicon.type='image/svg+xml';
-    favicon.href='/favicon.svg';
+    favicon.type='image/png';
+    favicon.href='/favicon-96.png';
 
     const upsertMeta=(selector,attr,name,content)=>{
       let meta=document.querySelector(selector);
