@@ -77,6 +77,8 @@
   };
 
   const loadBaseScript=()=>new Promise(resolve=>{
+    // script-base.js is normally included directly in the page; load it here only as a fallback.
+    if(document.querySelector('script[src^="script-base.js"]')){resolve();return;}
     const base=document.createElement('script');
     base.src='script-base.js';
     base.onload=resolve;
