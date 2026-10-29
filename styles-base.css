@@ -65,7 +65,6 @@
 .expert-card .master-photo{min-height:100%}
 .expert-card .master-info{position:relative;padding:34px 30px;background:#E8DED1;overflow:hidden}
 .expert-card .master-info::before{content:"";position:absolute;inset:auto -80px -110px auto;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(121,100,85,.12),transparent 66%)}
-.expert-card .master-info::after{content:"";position:absolute;inset:24px;border:1px solid rgba(121,100,85,.12);pointer-events:none}
 .expert-card .master-info>*{position:relative;z-index:1}
 .expert-card .master-info p{color:rgba(48,44,41,.75)}
 .expert-card .master-info>span{margin:10px 0 20px;color:rgba(48,44,41,.7)}
@@ -79,7 +78,6 @@
   .training-gallery figure{flex-basis:min(78vw,300px);border-radius:16px}
   .training-accordion summary{font-size:24px;padding:16px 0}
   .expert-card .master-info{padding:24px 18px}
-  .expert-card .master-info::after{inset:16px}
 }
 
 .service-badge{display:inline-flex;align-items:center;width:fit-content;margin:0 0 9px;padding:5px 9px;border:1px solid rgba(185,138,91,.28);background:rgba(185,138,91,.08);color:#8a6546;border-radius:999px;font-size:7px;line-height:1;text-transform:uppercase;letter-spacing:.13em;font-weight:600}.modal-highlight{margin:18px 0 4px;padding:18px 20px;border:1px solid rgba(185,138,91,.24);background:linear-gradient(135deg,rgba(232,222,209,.72),rgba(250,247,242,.92));border-radius:14px}.modal-highlight span{display:block;margin-bottom:6px;color:#8a6546;font-size:8px;text-transform:uppercase;letter-spacing:.14em;font-weight:600}.modal-highlight p{margin:0!important;color:rgba(48,44,41,.78)!important;font-size:12px!important}
