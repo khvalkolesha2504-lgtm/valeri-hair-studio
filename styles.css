@@ -130,6 +130,6 @@ body.result-modal-open{overflow:hidden}
 .dikidi-steps{counter-reset:dikidi-step;list-style:none!important;padding:0!important;margin:24px 0!important;display:grid!important;gap:12px!important}
 .dikidi-steps li{counter-increment:dikidi-step;display:grid!important;grid-template-columns:34px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;list-style:none!important;margin:0!important;padding:0!important}
 .dikidi-steps li::marker{content:""}
-.dikidi-steps strong{display:grid!important;place-items:center!important;width:30px!important;height:30px!important;border:1px solid rgba(48,44,41,.25)!important;border-radius:50%!important;font-size:0!important;font-weight:500!important;line-height:1!important;color:#302C29!important}
-.dikidi-steps strong::after{content:counter(dikidi-step);font:500 12px/1 Manrope,sans-serif!important;color:#302C29!important}
+.dikidi-steps strong{position:relative!important;display:grid!important;place-items:center!important;width:30px!important;height:30px!important;border:1px solid rgba(48,44,41,.25)!important;border-radius:50%!important;font-size:0!important;font-weight:500!important;line-height:1!important;color:#302C29!important}
+.dikidi-steps strong::after{content:counter(dikidi-step);position:absolute!important;inset:0!important;display:grid!important;place-items:center!important;font:500 12px/1 Manrope,sans-serif!important;color:#302C29!important}
 .dikidi-steps span{display:block!important;min-width:0!important;font-size:13px!important;line-height:1.45!important;color:#302C29!important}
