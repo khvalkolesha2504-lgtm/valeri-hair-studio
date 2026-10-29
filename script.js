@@ -106,7 +106,6 @@
           <div class="compare-divider" aria-hidden="true"><span>↔</span></div>
           <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Сравнить фото до и после — результат ${item.index+1}">
         </div>
-        <div class="compare-caption"><strong>До / после</strong></div>
       </article>`;
     }).join('');
 
