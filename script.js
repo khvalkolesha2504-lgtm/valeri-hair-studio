@@ -93,12 +93,10 @@
     const pairs=Array.from({length:7},(_,index)=>({
       index,
       src:`assets/result-compare-${String(index).padStart(2,'0')}.webp`,
-      rightLabel:index===4?'Спустя время':'После'
+      rightLabel:'После'
     }));
 
     const cards=pairs.map(item=>{
-      const n=String(item.index+1).padStart(2,'0');
-      const caption=item.index===4?'До / спустя время':'До / после';
       return `<article class="compare-card">
         <div class="compare-frame" style="--pos:50%">
           <div class="compare-layer compare-before" style="background-image:url('${item.src}')"></div>
@@ -108,7 +106,7 @@
           <div class="compare-divider" aria-hidden="true"><span>↔</span></div>
           <input class="compare-range" type="range" min="0" max="100" value="50" aria-label="Сравнить фото до и после — результат ${item.index+1}">
         </div>
-        <div class="compare-caption"><span>Результат ${n}</span><strong>${caption}</strong></div>
+        <div class="compare-caption"><strong>До / после</strong></div>
       </article>`;
     }).join('');
 
