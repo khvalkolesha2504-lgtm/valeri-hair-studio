@@ -64,7 +64,7 @@
 .expert-card{background:#E8DED1;box-shadow:0 22px 52px rgba(48,44,41,.08);overflow:hidden}
 .expert-card .master-photo{min-height:100%}
 .expert-card .master-info{position:relative;padding:34px 30px;background:#E8DED1;overflow:hidden}
-.expert-card .master-info::before{content:"";position:absolute;inset:auto -80px -110px auto;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(121,100,85,.12),transparent 66%)}
+.expert-card .master-info::before{display:none}
 .expert-card .master-info>*{position:relative;z-index:1}
 .expert-card .master-info p{color:rgba(48,44,41,.75)}
 .expert-card .master-info>span{margin:10px 0 20px;color:rgba(48,44,41,.7)}
