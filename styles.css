@@ -481,3 +481,36 @@ body.result-modal-open {
   line-height: 1.45;
   color: #302c29;
 }
+
+/* Instagram icon in the header: always visible, follows the header text colour. */
+.header-instagram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: -8px 0;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+.header-instagram svg {
+  width: 21px;
+  height: 21px;
+}
+.header-instagram:hover {
+  opacity: 0.65;
+}
+@media (max-width: 1120px) {
+  .menu-toggle {
+    order: 1;
+  }
+}
+@media (max-width: 760px) {
+  .site-header {
+    grid-template-columns: 1fr auto auto;
+  }
+  .header-actions {
+    gap: 4px;
+    margin-right: 6px;
+  }
+}
