@@ -242,6 +242,7 @@
 
   /* «проход сквозь арку» при прокрутке */
   function initHeroScroll() {
+    hero.style.marginBottom = '0px'; // резерв места из CSS заменяет настоящее закрепление
     const split = SplitText.create('#h1', { type: 'lines', mask: 'lines' });
     gsap.set('#copy .line-wrap, #copy .eyebrow, #copy .lead, #copy .actions', { opacity: 1 });
     gsap.set(split.lines, { yPercent: 110 });
@@ -268,39 +269,47 @@
 
   /* ---------- 5. Появление блоков при прокрутке ---------- */
   function initReveals() {
-    // заголовки секций — по строкам, маской снизу
-    $$('[data-split]').forEach((el) => {
-      const split = SplitText.create(el, { type: 'lines', mask: 'lines' });
-      el.classList.add('is-split');
-      gsap.set(split.lines, { yPercent: 110 });
-      gsap.to(split.lines, {
-        yPercent: 0, duration: 1.1, stagger: 0.08, ease: 'expo.out',
-        scrollTrigger: { trigger: el, start: 'top 86%', once: true }
-      });
+    // сначала только записываем начальные состояния, потом создаём триггеры:
+    // так браузер пересчитывает раскладку страницы один раз, а не на каждом элементе
+    const reveal = $$('[data-reveal]');
+    const curtains = $$('[data-curtain]');
+    const num = $('.rating-num');
+    gsap.set(reveal, { opacity: 0, y: 24 });
+    curtains.forEach((el) => {
+      gsap.set(el, { clipPath: 'inset(100% 0% 0% 0%)' });
+      gsap.set($$('img', el), { scale: el.closest('.valeria-photo') ? 1.1 : 1.08 });
     });
+    if (num) num.textContent = '0,0';
+
+    // заголовки секций — по строкам, маской снизу; строки считаем, когда до заголовка доходит прокрутка
+    $$('[data-split]').forEach((el) => ScrollTrigger.create({
+      trigger: el, start: 'top 88%', once: true,
+      onEnter: () => {
+        const split = SplitText.create(el, { type: 'lines', mask: 'lines' });
+        gsap.set(split.lines, { yPercent: 110 });
+        el.classList.add('is-split');
+        gsap.to(split.lines, { yPercent: 0, duration: 1.1, stagger: 0.08, ease: 'expo.out' });
+      }
+    }));
     // обычный текст и блоки — целиком, мягко снизу
-    gsap.set('[data-reveal]', { opacity: 0, y: 24 });
-    ScrollTrigger.batch('[data-reveal]', {
+    ScrollTrigger.batch(reveal, {
       start: 'top 90%', once: true,
       onEnter: (els) => gsap.to(els, { opacity: 1, y: 0, duration: 1, stagger: 0.08, ease: 'power3.out', overwrite: true })
     });
     // фото — шторкой снизу вверх и с лёгким уменьшением
-    $$('[data-curtain]').forEach((el) => {
-      const img = $$('img', el);
-      const from = el.closest('.valeria-photo') ? 1.1 : 1.08;
-      gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 85%', once: true } })
-        .fromTo(el, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.out' }, 0)
-        .fromTo(img, { scale: from }, { scale: 1, duration: 1.4, ease: 'expo.out' }, 0);
-    });
+    curtains.forEach((el) => ScrollTrigger.create({
+      trigger: el, start: 'top 85%', once: true,
+      onEnter: () => {
+        gsap.to(el, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.out' });
+        gsap.to($$('img', el), { scale: 1, duration: 1.4, ease: 'expo.out' });
+      }
+    }));
     // рейтинг: плавный отсчёт от 0 до 5,0
-    const num = $('.rating-num');
     if (num) {
       const o = { v: 0 };
-      num.textContent = '0,0';
-      gsap.to(o, {
-        v: parseFloat(num.dataset.count), duration: 1.2, ease: 'power3.out',
-        scrollTrigger: { trigger: num, start: 'top 88%', once: true },
-        onUpdate: () => { num.textContent = o.v.toFixed(1).replace('.', ','); }
+      ScrollTrigger.create({
+        trigger: num, start: 'top 88%', once: true,
+        onEnter: () => gsap.to(o, { v: parseFloat(num.dataset.count), duration: 1.2, ease: 'power3.out', onUpdate: () => { num.textContent = o.v.toFixed(1).replace('.', ','); } })
       });
     }
   }
@@ -619,21 +628,25 @@
     gsap.ticker.lagSmoothing(0);
     if (menuOpen || modal.classList.contains('is-open')) lenis.stop();
 
-    // порядок важен: закрепления создаём сверху вниз
+    // порядок важен: закрепления создаём сверху вниз.
+    // Работу делим на несколько коротких задач, чтобы не подвешивать телефон во время вступления.
     initHeroScroll();
     initResults();
-    initServices();
-    initStudio();
-    initContacts();
-    initReveals();
-    initAccordions();
-    ScrollTrigger.refresh();
-
-    // переход по ссылке с якорем: после закреплений позиции изменились — прокручиваем заново
-    if (location.hash.length > 1) {
-      const t = document.getElementById(location.hash.slice(1));
-      if (t) requestAnimationFrame(() => scrollToTarget(t, true));
-    }
-    onScrollHeader(scrollY);
+    setTimeout(() => {
+      initServices();
+      initStudio();
+      initContacts();
+      setTimeout(() => {
+        initReveals();
+        initAccordions();
+        ScrollTrigger.refresh();
+        // переход по ссылке с якорем: после закреплений позиции изменились — прокручиваем заново
+        if (location.hash.length > 1) {
+          const t = document.getElementById(location.hash.slice(1));
+          if (t) requestAnimationFrame(() => scrollToTarget(t, true));
+        }
+        onScrollHeader(scrollY);
+      }, 0);
+    }, 0);
   });
 })();
