@@ -9,7 +9,7 @@
    4.  Первый экран «Вход через арку» (перенесено из prototype/index.html)
    5.  Появление блоков при прокрутке
    6.  Ползунки «до / после»
-   7.  Ленты со стрелками; «До и после» на прокрутке; появление прайса
+   7.  Ленты со стрелками; «До и после» на прокрутке; прайс; студия; фон записи
    8.  Процедуры: окно с полным описанием (serviceData)
    9.  Раскрывающиеся разделы
    10. Запись и контакты: контур арки
@@ -286,7 +286,7 @@
     });
     // фото — шторкой снизу вверх и с лёгким уменьшением
     $$('[data-curtain]').forEach((el) => {
-      const img = $('img', el);
+      const img = $$('img', el);
       const from = el.closest('.valeria-photo') ? 1.1 : 1.08;
       gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 85%', once: true } })
         .fromTo(el, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, ease: 'expo.out' }, 0)
@@ -422,6 +422,57 @@
           .to([$('.price-num', btn), $('.price-main', btn), $('.price-cost', btn)], { opacity: 1, y: 0, duration: 0.9, stagger: 0.06, ease: 'power3.out' }, 0.18)
           .to($('.price-arrow', btn), { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.4);
       })
+    });
+  }
+
+  /* ---------- 7в. Студия: на компьютере вертикальная прокрутка двигает ленту по горизонтали ---------- */
+  function initStudio() {
+    const stage = $('#studioStage'), flow = $('#studioFlow'), track = $('#studioTrack');
+    if (!stage || !flow || !track) return;
+    const arches = $$('.arch', track);
+    // фото проявляются шторкой снизу вверх, по очереди
+    gsap.set(arches, { clipPath: 'inset(100% 0% 0% 0%)' });
+    gsap.set($$('img', track), { scale: 1.08 });
+    ScrollTrigger.create({
+      trigger: track, start: 'top 85%', once: true,
+      onEnter: () => {
+        gsap.to(arches, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.2, stagger: 0.08, ease: 'expo.out' });
+        gsap.to($$('img', track), { scale: 1, duration: 1.4, stagger: 0.08, ease: 'expo.out' });
+      }
+    });
+
+    const mm = gsap.matchMedia();
+    mm.add('(min-width: 1024px)', () => {
+      // насколько нужно сдвинуть ленту, чтобы показать последнее фото
+      const distance = () => {
+        const last = track.lastElementChild.getBoundingClientRect(), box = flow.getBoundingClientRect();
+        const padR = parseFloat(getComputedStyle(flow).paddingRight) || 0;
+        return Math.max(0, last.right - box.left + padR - innerWidth);
+      };
+      const move = gsap.to(flow, {
+        x: () => -distance(), ease: 'none',
+        scrollTrigger: {
+          trigger: stage, start: 'top top', end: () => '+=' + distance() * 0.6,
+          pin: true, scrub: 1, invalidateOnRefresh: true
+        }
+      });
+      // параллакс: фото внутри арки отстаёт от рамки примерно на 8 %
+      $$('.studio-shot', track).forEach((shot) => {
+        gsap.fromTo($('img', shot), { xPercent: -7 }, {
+          xPercent: 7, ease: 'none',
+          scrollTrigger: { trigger: shot, containerAnimation: move, start: 'left right', end: 'right left', scrub: true }
+        });
+      });
+    });
+  }
+
+  /* ---------- 7г. Запись: фон чуть медленнее прокрутки ---------- */
+  function initContacts() {
+    const img = $('.contacts-bg img');
+    if (!img) return;
+    gsap.fromTo(img, { yPercent: -5, scale: 1.08 }, {
+      yPercent: 5, ease: 'none',
+      scrollTrigger: { trigger: '#contacts', start: 'top bottom', end: 'bottom top', scrub: true }
     });
   }
 
@@ -572,6 +623,8 @@
     initHeroScroll();
     initResults();
     initServices();
+    initStudio();
+    initContacts();
     initReveals();
     initAccordions();
     ScrollTrigger.refresh();
