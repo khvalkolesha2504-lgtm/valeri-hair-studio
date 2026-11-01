@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VALERI HAIR STUDIO — прототип первого экрана</title>
+<!--
+  ПРОТОТИП первого экрана «Вход через арку».
+  Это эталон для переноса на сайт: структура, тайминги и эффекты — как здесь.
+  Библиотеки и шрифты лежат локально (vendor/, fonts/), чтобы прототип открывался без интернета.
+  На сайте можно подключить те же версии с CDN.
+-->
+<script>document.documentElement.classList.add('js');</script>
+<link rel="stylesheet" href="vendor/lenis.css">
+<style>
+/* ---------- шрифты (кириллица + латиница) ---------- */
+@font-face{font-family:"Cormorant Garamond";font-style:normal;font-weight:300;font-display:swap;src:url(fonts/cormorant-garamond-cyrillic-300-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Cormorant Garamond";font-style:normal;font-weight:300;font-display:swap;src:url(fonts/cormorant-garamond-latin-300-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Cormorant Garamond";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/cormorant-garamond-cyrillic-400-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Cormorant Garamond";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/cormorant-garamond-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;font-weight:400;font-display:swap;src:url(fonts/cormorant-garamond-cyrillic-400-italic.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Cormorant Garamond";font-style:italic;font-weight:400;font-display:swap;src:url(fonts/cormorant-garamond-latin-400-italic.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Manrope";font-style:normal;font-weight:300 500;font-display:swap;src:url(fonts/manrope-cyrillic-400-normal.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Manrope";font-style:normal;font-weight:300 500;font-display:swap;src:url(fonts/manrope-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Cinzel";font-style:normal;font-weight:500;font-display:swap;src:url(fonts/cinzel-latin-500-normal.woff2) format("woff2")}
+
+/* ---------- токены ---------- */
+:root{
+  --milk:#faf7f2; --paper:#fffdf9; --soft:#f2ebe2; --beige:#e8ded1;
+  --coffee:#796455; --graphite:#302c29; --night:#1d1916;
+  --gold:#b98a5b; --gold-light:#f0d38c; --gold-deep:#8f5e1c;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --gutter:clamp(16px,4vw,64px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--milk);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+
+/* ---------- плёночное зерно поверх всей страницы ---------- */
+.grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ---------- шапка ---------- */
+.header{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:18px var(--gutter);transition:background .5s var(--ease),color .5s var(--ease),transform .5s var(--ease)}
+.header.is-solid{background:rgba(250,247,242,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--graphite)}
+.header.is-hidden{transform:translateY(-100%)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{width:34px;height:34px}
+.brand span{display:flex;flex-direction:column;line-height:1;font-family:"Cinzel",var(--serif);font-weight:500}
+.brand b{font-weight:500;font-size:17px;letter-spacing:.14em}
+.brand small{font-size:8.5px;letter-spacing:.32em;margin-top:5px;opacity:.8}
+.nav{display:none;gap:clamp(18px,2vw,34px);font-size:13px;letter-spacing:.02em}
+.nav a{text-decoration:none;opacity:.82;transition:opacity .25s}
+.nav a:hover{opacity:1}
+@media (min-width:1100px){.nav{display:flex}}
+.header-cta{display:flex;align-items:center;gap:22px;font-size:13px}
+.header-cta .phone{display:none;text-decoration:none;opacity:.85}
+@media (min-width:768px){.header-cta .phone{display:inline}}
+.btn{position:relative;display:inline-flex;align-items:center;gap:10px;overflow:hidden;border-radius:999px;
+  padding:13px 24px;font:500 12px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;
+  border:1px solid currentColor;isolation:isolate;transition:color .35s var(--ease),border-color .35s var(--ease)}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(120deg,var(--gold-deep),var(--gold) 45%,var(--gold-light));
+  transform:translateY(101%);transition:transform .45s var(--ease)}
+.btn:hover::before{transform:translateY(0)}
+.btn:hover{color:var(--night);border-color:transparent}
+.btn-gold{border-color:rgba(240,211,140,.55)}
+
+/* ---------- первый экран ---------- */
+.hero{position:relative;height:100vh;height:100svh;overflow:hidden;background:var(--night)}
+.stage{position:absolute;inset:0}
+
+/* фото студии: видно только внутри арки; при прокрутке вырез растёт до всего экрана */
+.photo{position:absolute;inset:0;will-change:clip-path}
+.photo-scale{position:absolute;inset:0;will-change:transform}
+.kb{position:absolute;inset:-3%;animation:kb 26s ease-in-out infinite alternate}
+.kb img{width:100%;height:100%;object-fit:cover}
+@keyframes kb{from{transform:scale(1) translate(0,0)}to{transform:scale(1.06) translate(-1.4%,-1%)}}
+/* медленно проходящий тёплый свет — «живое» фото */
+.light{position:absolute;inset:0;mix-blend-mode:soft-light;pointer-events:none;
+  background:linear-gradient(110deg,transparent 34%,rgba(255,226,170,.55) 48%,transparent 62%);background-size:260% 100%;
+  animation:sweep 15s ease-in-out infinite alternate}
+@keyframes sweep{from{background-position:110% 0}to{background-position:-10% 0}}
+.dust{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.shade{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:
+    linear-gradient(180deg,rgba(20,16,13,.5) 0%,rgba(20,16,13,0) 22%,rgba(20,16,13,0) 40%,rgba(20,16,13,.88) 100%),
+    linear-gradient(90deg,rgba(20,16,13,.6) 0%,rgba(20,16,13,.25) 45%,rgba(20,16,13,0) 70%)}
+
+/* золотой контур арки, как LED-подсветка зеркал в студии */
+.arch-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.arch-line{fill:none;stroke:#e9c98a;stroke-width:1.4;filter:drop-shadow(0 0 6px rgba(240,200,120,.75)) drop-shadow(0 0 18px rgba(240,190,100,.35))}
+
+/* монограмма и подпись внутри арки */
+.mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:clamp(18px,3vh,30px);text-align:center;will-change:transform,opacity}
+.mono{width:var(--mono-w,200px);height:auto;overflow:visible;filter:drop-shadow(0 0 22px rgba(240,190,100,.18))}
+.word{font:500 clamp(11px,1vw,13px)/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--gold-light);margin:0}
+.sub{font:300 clamp(12px,1.05vw,14px)/1.4 var(--sans);letter-spacing:.06em;color:rgba(250,247,242,.62);margin:0}
+
+/* текст, который появляется после прохода сквозь арку */
+.copy{position:absolute;left:var(--gutter);right:var(--gutter);bottom:clamp(36px,8vh,88px);max-width:820px}
+.eyebrow{font:500 11px/1.4 var(--sans);letter-spacing:.24em;text-transform:uppercase;color:var(--gold-light);margin:0 0 18px}
+.h1{font:300 clamp(46px,7.4vw,124px)/.95 var(--serif);letter-spacing:-.01em;margin:0}
+.h1 em{font-style:italic;color:var(--gold-light)}
+.lead{font:300 clamp(15px,1.25vw,18px)/1.6 var(--sans);color:rgba(250,247,242,.82);max-width:520px;margin:22px 0 30px}
+.actions{display:flex;flex-wrap:wrap;gap:12px}
+.cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;
+  font:500 10px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:rgba(250,247,242,.55)}
+.cue i{width:1px;height:42px;background:linear-gradient(var(--gold-light),transparent);transform-origin:top;animation:cue 2.4s var(--ease) infinite}
+@keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+
+/* начальные состояния только при включённом JS: без JS всё видно сразу */
+html.js .mark,html.js .header,html.js .cue{opacity:0}
+html.js .copy .line-wrap,html.js .copy .lead,html.js .copy .actions,html.js .copy .eyebrow{opacity:0}
+html:not(.js) .mark,html:not(.js) .arch-svg{display:none}
+html:not(.js) .shade{opacity:1}
+
+/* следующая секция (заглушка для прототипа) */
+.next{position:relative;z-index:2;background:var(--graphite);color:var(--milk);padding:clamp(80px,14vh,160px) var(--gutter);min-height:80vh}
+.next .eyebrow{color:var(--gold-light)}
+.next h2{font:300 clamp(38px,5.5vw,84px)/1 var(--serif);margin:0 0 20px}
+.next h2 em{font-style:italic;color:var(--gold-light)}
+.next p{max-width:560px;color:rgba(250,247,242,.72);line-height:1.65}
+
+@media (prefers-reduced-motion:reduce){
+  .kb,.light,.cue i{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="header" id="header">
+  <a class="brand" href="#top" aria-label="VALERI HAIR STUDIO — на главную">
+    <img src="../assets/logo/valeri-monogram.svg" alt="" width="34" height="34">
+    <span><b>VALERI</b><small>HAIR STUDIO</small></span>
+  </a>
+  <nav class="nav" aria-label="Основная навигация">
+    <a href="#results">Результаты</a><a href="#">Процедуры</a><a href="#">Студия</a><a href="#">Валерия</a><a href="#">Обучение</a><a href="#">Отзывы</a><a href="#">Контакты</a>
+  </nav>
+  <div class="header-cta">
+    <a class="phone" href="tel:+375333945022">+375 (33) 394-50-22</a>
+    <a class="btn btn-gold" href="https://dikidi.net/#widget=220056">Записаться</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" id="hero" aria-label="VALERI HAIR STUDIO">
+    <div class="stage">
+      <div class="photo" id="photo">
+        <div class="photo-scale" id="photoScale">
+          <div class="kb">
+            <picture>
+              <source media="(max-width: 767px)" sizes="100vw"
+                srcset="../assets/new/studio-arch-vertical-828.webp 828w, ../assets/new/studio-arch-vertical-1080.webp 1080w, ../assets/new/studio-arch-vertical-1440.webp 1440w">
+              <img src="../assets/new/studio-hall-wide-1920.webp" sizes="100vw"
+                srcset="../assets/new/studio-hall-wide-1280.webp 1280w, ../assets/new/studio-hall-wide-1920.webp 1920w, ../assets/new/studio-hall-wide-2560.webp 2560w"
+                alt="Зал студии с арочными зеркалами и золотой подсветкой" fetchpriority="high" width="1920" height="1080">
+            </picture>
+          </div>
+          <div class="light" aria-hidden="true"></div>
+          <canvas class="dust" id="dust" aria-hidden="true"></canvas>
+        </div>
+      </div>
+      <div class="shade" id="shade"></div>
+
+      <svg class="arch-svg" id="archSvg" aria-hidden="true"><path class="arch-line" id="archLine" d=""/></svg>
+
+      <div class="mark" id="mark">
+        <svg class="mono" xmlns="http://www.w3.org/2000/svg" viewBox="-60.9 -60.9 1135.9 1121.7" role="img" aria-label="Монограмма VALERI: сплетённые буквы X и V">
+  <defs>
+    <linearGradient id="gold" gradientUnits="userSpaceOnUse" x1="0.0" y1="0.0" x2="1014.2" y2="1000.0">
+      <stop offset="0" stop-color="#7c4f16"/>
+      <stop offset="0.16" stop-color="#b8862f"/>
+      <stop offset="0.30" stop-color="#f1d184"/>
+      <stop offset="0.40" stop-color="#d9ac4f"/>
+      <stop offset="0.55" stop-color="#a2701f"/>
+      <stop offset="0.70" stop-color="#d7ad55"/>
+      <stop offset="0.82" stop-color="#f4dc97"/>
+      <stop offset="1" stop-color="#93621c"/>
+    </linearGradient>
+    <linearGradient id="goldR" gradientUnits="userSpaceOnUse" x1="11.0" y1="0.0" x2="690.2" y2="1000.0">
+      <stop offset="0" stop-color="#8a5a1a"/>
+      <stop offset="0.22" stop-color="#d1a14a"/>
+      <stop offset="0.42" stop-color="#f6e09c"/>
+      <stop offset="0.58" stop-color="#d4a64d"/>
+      <stop offset="0.80" stop-color="#a87524"/>
+      <stop offset="1" stop-color="#e6c271"/>
+    </linearGradient>
+    <linearGradient id="goldV" gradientUnits="userSpaceOnUse" x1="208.0" y1="410.0" x2="894.4" y2="1000.0">
+      <stop offset="0" stop-color="#9b6a20"/>
+      <stop offset="0.35" stop-color="#6f4512"/>
+      <stop offset="0.62" stop-color="#b98835"/>
+      <stop offset="0.85" stop-color="#f0d389"/>
+      <stop offset="1" stop-color="#c9973e"/>
+    </linearGradient>
+    <linearGradient id="goldT" gradientUnits="userSpaceOnUse" x1="0.0" y1="0.0" x2="1014.2" y2="1000.0">
+      <stop offset="0" stop-color="#8f5e1c"/>
+      <stop offset="0.20" stop-color="#c48f38"/>
+      <stop offset="0.42" stop-color="#f0d38c"/>
+      <stop offset="0.58" stop-color="#d5a750"/>
+      <stop offset="0.80" stop-color="#b07a28"/>
+      <stop offset="0.92" stop-color="#e3bf6c"/>
+      <stop offset="1" stop-color="#9a671f"/>
+    </linearGradient>
+  </defs>
+  
+  
+  <g id="monogram">    <path id="x-thin" fill="url(#gold)" d="M554.66357421875 474.0066833496094 532.1135864257812 430.1621398925781 694.2921752929688 214.90049743652344Q754.3318481445312 126.486572265625 749.7674560546875 74.4000015258789Q744.9302368164062 19.200000762939453 665.9224853515625 19.200000762939453Q662.6976928710938 19.200000762939453 662.6976928710938 9.600000381469727Q662.6976928710938 0.0 665.9224853515625 0.0Q712.6821899414062 0.0 754.6046752929688 2.4000000953674316Q796.5271606445312 4.800000190734863 865.8604736328125 4.800000190734863Q912.6201782226562 4.800000190734863 940.8372192382812 2.4000000953674316Q969.0542602539062 0.0 1009.3643188476562 0.0Q1014.2015380859375 0.0 1014.2015380859375 9.600000381469727Q1014.2015380859375 19.200000762939453 1009.3643188476562 19.200000762939453Q962.6046752929688 19.200000762939453 890.8527221679688 69.5999984741211Q829.2429809570312 112.87590026855469 757.5286254882812 203.92733764648438L713.833984375 262.09912109375L690.8050537109375 293.3699645996094L690.6503295898438 292.9641418457031ZM350.32928466796875 670.565185546875 350.5386047363281 671.1689453125 361.1202392578125 657.1238403320312 383.9519348144531 701.2793579101562 319.7680358886719 786.72900390625Q259.8750915527344 873.5748291015625 264.4341125488281 925.5999755859375Q269.2713317871094 980.7999877929688 348.2790832519531 980.7999877929688Q351.5038757324219 980.7999877929688 351.5038757324219 990.3999938964844Q351.5038757324219 1000.0 348.2790832519531 1000.0Q301.5193786621094 1000.0 259.5969009399414 998.3999938964844Q217.67442321777344 996.7999877929688 148.34107971191406 996.7999877929688Q103.19380187988281 996.7999877929688 74.97674560546875 998.3999938964844Q46.75968933105469 1000.0 4.837209224700928 1000.0Q0.0 1000.0 0.0 990.3999938964844Q0.0 980.7999877929688 4.837209224700928 980.7999877929688Q51.596900939941406 980.7999877929688 123.34883117675781 931.199951171875Q182.13050842285156 890.56591796875 249.02828979492188 805.9049072265625L292.4103698730469 748.3233032226562Z"/>    <path id="v" fill="url(#goldV)" d="M278.3639831542969 412.80621337890625 545.3452758789062 929.135986328125Q547.69091796875 933.6722412109375 552.4063720703125 935.6328735351562Q557.7609252929688 937.859130859375 563.1214599609375 935.6470947265625Q568.468994140625 933.4404296875 570.6976318359375 928.1063232421875L602.6165161132812 851.3369750976562L602.7315063476562 851.5604858398438L736.7135009765625 529.3153076171875Q737.9639892578125 526.212158203125 739.0576782226562 523.17724609375Q754.1880493164062 481.1903381347656 739.2901000976562 452.2770690917969Q723.3153076171875 421.2738952636719 672.8143920898438 421.2738952636719Q669.7225341796875 421.2738952636719 669.7225341796875 415.63694763183594Q669.7225341796875 410.0 672.8143920898438 410.0Q702.7026977539062 410.0 729.4990844726562 411.40924072265625Q751.3861083984375 412.560302734375 784.9619750976562 412.77117919921875Q792.4931640625 412.8184814453125 800.6126098632812 412.8184814453125Q829.4702758789062 412.8184814453125 847.5063171386719 411.40924072265625Q865.5423583984375 410.0 891.30810546875 410.0Q894.4000244140625 410.0 894.4000244140625 415.63694763183594Q894.4000244140625 421.2738952636719 891.30810546875 421.2738952636719Q853.1748046875 421.2738952636719 819.6792907714844 451.33758544921875Q786.1837768554688 481.4012756347656 765.5711669921875 532.1337280273438L574.9044799804688 996.2420654296875Q573.8739013671875 1000.0 564.0828857421875 1000.0Q554.2918701171875 1000.0 552.2306518554688 996.2420654296875L546.7640380859375 985.6698608398438L289.4198303222656 487.97772216796875Q271.89910888671875 455.0955505371094 253.3477554321289 438.1847229003906Q234.79640197753906 421.2738952636719 211.09188842773438 421.2738952636719Q208.0 421.2738952636719 208.0 415.63694763183594Q208.0 410.0 211.09188842773438 410.0Q223.45945739746094 410.0 230.15855407714844 410.9394836425781Q236.85765075683594 411.87896728515625 248.70989990234375 412.3487243652344Q258.6468505859375 412.7425842285156 278.3639831542969 412.80621337890625Z"/>    <path id="x-ribbon" fill="url(#goldR)" d="M292.6737976074219 410.0 149.01255798339844 132.1656036376953Q119.31642150878906 76.43312072753906 87.87345123291016 47.770700454711914Q56.43048095703125 19.108280181884766 16.253355026245117 19.108280181884766Q11.012860298156738 19.108280181884766 11.012860298156738 9.554140090942383Q11.012860298156738 0.0 16.253355026245117 0.0Q37.215335845947266 0.0 48.569740295410156 1.5923566818237305Q59.92414474487305 3.184713363647461 80.01270866394043 3.980891704559326Q100.10127258300781 4.777070045471191 143.77206420898438 4.777070045471191Q241.59463500976562 4.777070045471191 302.7337341308594 3.980891704559326Q363.8728332519531 3.184713363647461 402.3031311035156 1.5923566818237305Q440.7334289550781 0.0 468.6827087402344 0.0Q473.9232177734375 0.0 473.9232177734375 9.554140090942383Q473.9232177734375 19.108280181884766 468.6827087402344 19.108280181884766Q393.5689697265625 19.108280181884766 369.1133270263672 57.32484245300293Q344.6576843261719 95.5414047241211 377.84747314453125 160.82801818847656L506.000732421875 410.0L605.2308959960938 602.9359741210938L652.6267700195312 695.0890502929688L590.799560546875 843.7919921875Q590.1710815429688 844.8035278320312 589.6893310546875 845.962158203125L557.7811889648438 922.7056884765625Z"/>  </g>
+</svg>
+        <p class="word" id="word">VALERI · HAIR STUDIO</p>
+        <p class="sub" id="sub">Студия восстановления волос · Минск</p>
+      </div>
+
+      <div class="copy" id="copy">
+        <p class="eyebrow">Минск · студия восстановления волос</p>
+        <h1 class="h1" id="h1"><span class="line-wrap">Восстановление волос.</span> <span class="line-wrap"><em>Без шаблонов.</em></span></h1>
+        <p class="lead">Сначала диагностика, затем процедура, подобранная под состояние ваших волос.</p>
+        <div class="actions">
+          <a class="btn btn-gold" href="https://dikidi.net/#widget=220056">Записаться <span aria-hidden="true">→</span></a>
+          <a class="btn" href="#results">Смотреть результаты</a>
+        </div>
+      </div>
+
+      <div class="cue" id="cue" aria-hidden="true">листайте<i></i></div>
+    </div>
+  </section>
+
+  <section class="next" id="results">
+    <p class="eyebrow">Результаты</p>
+    <h2>До и <em>после</em></h2>
+    <p>Здесь начинается блок «До и после» из задания. В прототипе показан только первый экран.</p>
+  </section>
+</main>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/SplitText.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const mobile = () => innerWidth < 768;
+  const $ = (s) => document.querySelector(s);
+  const hero = $('#hero'), photo = $('#photo'), photoScale = $('#photoScale');
+  const archLine = $('#archLine'), mark = $('#mark'), header = $('#header');
+
+  /* ---------- геометрия арки: ширина : высота ≈ 1 : 1.9, верх полукруглый ---------- */
+  let A = {};
+  function archBox() {
+    const W = innerWidth, H = innerHeight;
+    let h = mobile() ? Math.min(H * 0.64, W * 0.66 * 1.9) : H * 0.72;
+    let w = h / 1.9;
+    const x = (W - w) / 2, y = (H - h) / 2 + (mobile() ? -H * 0.02 : 0);
+    A = { W, H, x, y, w, h, r: w / 2 };
+    // контур арки: снизу слева → вверх → полукруг → вниз справа
+    archLine.setAttribute('d', `M${x},${y + h} V${y + A.r} A${A.r},${A.r} 0 0 1 ${x + w},${y + A.r} V${y + h}`);
+    $('#archSvg').setAttribute('viewBox', `0 0 ${W} ${H}`);
+    document.documentElement.style.setProperty('--mono-w', (w * 0.56) + 'px');
+    setReveal(state.reveal);
+  }
+
+  /* вырез фото: p=0 — форма арки, p=1 — весь экран */
+  const state = { reveal: 0 };
+  function setReveal(p) {
+    state.reveal = p;
+    const k = 1 - p;
+    const t = A.y * k, b = (A.H - A.y - A.h) * k, l = A.x * k, r = (A.W - A.x - A.w) * k;
+    // верх остаётся аркой (полукруг на всю текущую ширину) почти до конца, потом плавно выпрямляется
+    const curW = A.W - l - r;
+    const rad = (curW / 2) * Math.pow(k, 0.55);
+    photo.style.clipPath = `inset(${t}px ${r}px ${b}px ${l}px round ${rad}px ${rad}px ${4 * k}px ${4 * k}px)`;
+  }
+
+  /* ---------- проявление частей монограммы «шторкой» по диагонали ---------- */
+  const svg = document.querySelector('.mono');
+  const NS = 'http://www.w3.org/2000/svg';
+  const defs = svg.querySelector('defs');
+  function makeWipe(el, dir) {
+    const len = Math.hypot(dir[0], dir[1]); const d = [dir[0] / len, dir[1] / len]; const n = [-d[1], d[0]];
+    const bb = el.getBBox();
+    const corners = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height], [bb.x + bb.width, bb.y + bb.height]];
+    const proj = corners.map(c => c[0] * d[0] + c[1] * d[1]);
+    const min = Math.min(...proj), max = Math.max(...proj);
+    const cp = document.createElementNS(NS, 'clipPath'); cp.id = 'wipe-' + el.id; cp.setAttribute('clipPathUnits', 'userSpaceOnUse');
+    const poly = document.createElementNS(NS, 'polygon'); cp.appendChild(poly); defs.appendChild(cp);
+    el.setAttribute('clip-path', `url(#${cp.id})`);
+    const o = { t: 0 }, BIG = 5000;
+    const draw = () => {
+      const s = min + (max - min) * o.t;
+      const c = [d[0] * s, d[1] * s]; // точка на линии фронта (проекция от начала координат)
+      const p1 = [c[0] + n[0] * BIG, c[1] + n[1] * BIG], p2 = [c[0] - n[0] * BIG, c[1] - n[1] * BIG];
+      const p3 = [p2[0] - d[0] * BIG, p2[1] - d[1] * BIG], p4 = [p1[0] - d[0] * BIG, p1[1] - d[1] * BIG];
+      poly.setAttribute('points', [p1, p2, p3, p4].map(p => p.join(',')).join(' '));
+    };
+    draw();
+    return { o, draw };
+  }
+
+  /* блик по золоту: полоса света, видимая только на буквах */
+  function makeShine() {
+    const mask = document.createElementNS(NS, 'mask'); mask.id = 'shine-mask';
+    ['x-thin', 'v', 'x-ribbon'].forEach(id => { const c = svg.getElementById(id).cloneNode(); c.removeAttribute('id'); c.removeAttribute('clip-path'); c.setAttribute('fill', '#fff'); mask.appendChild(c); });
+    defs.appendChild(mask);
+    const g = document.createElementNS(NS, 'linearGradient'); g.id = 'shine-grad';
+    [['0', 'rgba(255,246,220,0)'], ['.5', 'rgba(255,246,220,.85)'], ['1', 'rgba(255,246,220,0)']].forEach(([o, c]) => { const s = document.createElementNS(NS, 'stop'); s.setAttribute('offset', o); s.setAttribute('stop-color', c); g.appendChild(s); });
+    defs.appendChild(g);
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('y', -400); rect.setAttribute('width', 260); rect.setAttribute('height', 2000); rect.setAttribute('x', -700);
+    rect.setAttribute('fill', 'url(#shine-grad)'); rect.setAttribute('transform', 'rotate(20 500 500)'); rect.setAttribute('mask', 'url(#shine-mask)');
+    const wrap = document.createElementNS(NS, 'g'); wrap.setAttribute('mask', 'url(#shine-mask)'); wrap.appendChild(rect); rect.removeAttribute('mask');
+    svg.appendChild(wrap);
+    return rect;
+  }
+
+  /* ---------- пылинки в лучах света ---------- */
+  function dust() {
+    const c = $('#dust'), ctx = c.getContext('2d'); let w, h, dpr, parts = [], run = true;
+    const size = () => { dpr = Math.min(devicePixelRatio || 1, 2); w = c.clientWidth; h = c.clientHeight; c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    size(); addEventListener('resize', size);
+    const N = mobile() ? 26 : 48;
+    for (let i = 0; i < N; i++) parts.push({ x: Math.random() * w, y: Math.random() * h, r: .5 + Math.random() * 1.6, vy: -(.06 + Math.random() * .18), ph: Math.random() * 6.28, a: .15 + Math.random() * .4 });
+    new IntersectionObserver(([e]) => { run = e.isIntersecting; if (run) requestAnimationFrame(loop); }).observe(hero);
+    function loop(t) {
+      if (!run) return;
+      ctx.clearRect(0, 0, w, h);
+      for (const p of parts) {
+        p.y += p.vy; p.x += Math.sin(t / 2600 + p.ph) * .12;
+        if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
+        const tw = .6 + .4 * Math.sin(t / 900 + p.ph);
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+        g.addColorStop(0, `rgba(255,236,200,${p.a * tw})`); g.addColorStop(1, 'rgba(255,236,200,0)');
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 6.283); ctx.fill();
+      }
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- шапка: светлая после первого экрана, прячется при прокрутке вниз ---------- */
+  let lastY = 0;
+  function onScrollHeader(y) {
+    header.classList.toggle('is-solid', y > innerHeight * 2.2);
+    header.classList.toggle('is-hidden', y > lastY && y > innerHeight * 2.4);
+    lastY = y;
+  }
+
+  /* ---------- режим без анимаций ---------- */
+  archBox();
+  addEventListener('resize', () => { archBox(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+  if (reduce || !window.gsap) {
+    setReveal(1); mark.style.display = 'none'; $('#archSvg').style.display = 'none';
+    document.querySelectorAll('.copy *, .header, .cue').forEach(el => el.style.opacity = 1);
+    $('#shade').style.opacity = 1;
+    return;
+  }
+
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+
+  /* плавная прокрутка */
+  const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  lenis.on('scroll', (e) => { ScrollTrigger.update(); onScrollHeader(e.scroll); });
+  gsap.ticker.add((t) => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0);
+
+  /* ---------- 1. вступление при загрузке ---------- */
+  const len = archLine.getTotalLength();
+  gsap.set(archLine, { strokeDasharray: len, strokeDashoffset: len });
+  gsap.set(mark, { opacity: 1 });
+  gsap.set(['#word', '#sub'], { opacity: 0 });
+  gsap.set(photo, { opacity: 0 });
+  const wipes = {
+    thin: makeWipe(svg.getElementById('x-thin'), [-0.62, 1]),   // сверху справа вниз влево
+    ribbon: makeWipe(svg.getElementById('x-ribbon'), [0.55, 1]), // сверху слева вниз
+    v: makeWipe(svg.getElementById('v'), [0, 1])                  // сверху вниз к острию
+  };
+  const shine = makeShine();
+  const intro = gsap.timeline({ defaults: { ease: 'power3.out' } })
+    .to(archLine, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.2)
+    .to(wipes.thin.o, { t: 1, duration: 0.9, onUpdate: wipes.thin.draw }, 1.1)
+    .to(wipes.ribbon.o, { t: 1, duration: 0.9, onUpdate: wipes.ribbon.draw }, 1.25)
+    .to(wipes.v.o, { t: 1, duration: 0.9, onUpdate: wipes.v.draw }, 1.4)
+    .to(shine, { attr: { x: 1500 }, duration: 1.1, ease: 'power2.inOut' }, 2.05)
+    .fromTo('#word', { opacity: 0, letterSpacing: '0.6em' }, { opacity: 1, letterSpacing: '0.32em', duration: 1.0 }, 2.2)
+    .fromTo('#sub', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.8 }, 2.45)
+    .to([header, '#cue'], { opacity: 1, duration: 0.8 }, 2.6);
+  if (mobile()) intro.timeScale(1.35);
+  try { if (sessionStorage.getItem('valeri-intro')) intro.timeScale(5); sessionStorage.setItem('valeri-intro', '1'); } catch (e) {}
+  // если человек начал листать во время вступления — сразу к концу
+  const skip = () => { if (intro.progress() < 1) intro.progress(1); };
+  ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, skip, { once: true, passive: true }));
+
+  /* ---------- 2. «проход сквозь арку» при прокрутке ---------- */
+  const split = SplitText.create('#h1', { type: 'lines', mask: 'lines' });
+  gsap.set('#copy .line-wrap, #copy .eyebrow, #copy .lead, #copy .actions', { opacity: 1 });
+  gsap.set(split.lines, { yPercent: 110 });
+  gsap.set('#copy .eyebrow, #copy .lead, #copy .actions', { opacity: 0, y: 18 });
+
+  const r = { p: 0 };
+  const tl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: { trigger: hero, start: 'top top', end: () => '+=' + (mobile() ? 1.5 : 2) * innerHeight, pin: true, scrub: 1, invalidateOnRefresh: true }
+  });
+  tl.to(mark, { opacity: 0, y: -60, duration: 0.18 }, 0)
+    .to('#cue', { opacity: 0, duration: 0.08 }, 0)
+    .fromTo(photo, { opacity: 0 }, { opacity: 1, duration: 0.16 }, 0.02)
+    .fromTo(photoScale, { scale: 1.3 }, { scale: 1, duration: 0.55, ease: 'power1.out' }, 0.08)
+    .to(r, { p: 1, duration: 0.5, ease: 'power2.inOut', onUpdate: () => setReveal(r.p) }, 0.12)
+    .to('#archSvg', { opacity: 0, scale: 1.35, transformOrigin: '50% 50%', duration: 0.26 }, 0.12)
+    .to('#shade', { opacity: 1, duration: 0.2 }, 0.52)
+    .to('#copy .eyebrow', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.62)
+    .to(split.lines, { yPercent: 0, duration: 0.18, stagger: 0.05, ease: 'power3.out' }, 0.66)
+    .to('#copy .lead', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.8)
+    .to('#copy .actions', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.86)
+    .to({}, { duration: 0.1 }); // небольшая пауза, прежде чем секция открепится
+
+  dust();
+})();
+</script>
+</body>
+</html>
