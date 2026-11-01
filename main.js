@@ -9,7 +9,7 @@
    4.  Первый экран «Вход через арку» (перенесено из prototype/index.html)
    5.  Появление блоков при прокрутке
    6.  Ползунки «до / после»
-   7.  Ленты со стрелками
+   7.  Ленты со стрелками; «До и после» на прокрутке; появление прайса
    8.  Процедуры: окно с полным описанием (serviceData)
    9.  Раскрывающиеся разделы
    10. Запись и контакты: контур арки
@@ -305,28 +305,123 @@
     }
   }
 
-  /* ---------- 6. Ползунки «до / после» ---------- */
+  /* ---------- 6. Ползунки «до / после» ----------
+     Мышью линию можно тянуть за любое место фото. На телефоне тянем за ручку,
+     а свайп по самому фото листает ленту; короткое касание переносит линию в точку касания.
+     С клавиатуры работает невидимый ползунок <input type="range">. */
   function initCompare() {
     $$('.compare').forEach((frame) => {
       const input = $('.compare-range', frame);
       if (!input) return;
-      const update = () => frame.style.setProperty('--pos', input.value + '%');
-      input.addEventListener('input', update);
-      update();
+      const flip = frame.classList.contains('compare--feature'); // «после» слева
+      const lb = $('.compare-label--before', frame), la = $('.compare-label--after', frame);
+      const set = (v) => {
+        v = Math.max(0, Math.min(100, v));
+        frame.style.setProperty('--pos', v + '%');
+        input.value = String(Math.round(v));
+        const afterShare = flip ? v : 100 - v;
+        la.style.opacity = afterShare < 6 ? '0' : '';
+        lb.style.opacity = afterShare > 94 ? '0' : '';
+        input.setAttribute('aria-valuetext', `«После» — ${Math.round(afterShare)} %`);
+      };
+      frame.compareSet = set;
+      set(+input.value);
+      input.addEventListener('input', () => set(+input.value));
+      input.addEventListener('focus', () => frame.classList.toggle('is-focus', input.matches(':focus-visible')));
+      input.addEventListener('blur', () => frame.classList.remove('is-focus'));
+
+      const posFrom = (x) => { const r = frame.getBoundingClientRect(); return (x - r.left) / r.width * 100; };
+      let drag = null;
+      frame.addEventListener('pointerdown', (e) => {
+        const onHandle = !!e.target.closest('.compare-divider i');
+        if (e.pointerType === 'mouse' || onHandle) {
+          drag = { id: e.pointerId };
+          frame.setPointerCapture(e.pointerId);
+          frame.classList.add('is-drag');
+          set(posFrom(e.clientX));
+          e.preventDefault();
+        } else {
+          drag = { tap: true, x: e.clientX, y: e.clientY, t: performance.now() };
+        }
+      });
+      frame.addEventListener('pointermove', (e) => { if (drag && !drag.tap) set(posFrom(e.clientX)); });
+      const end = (e) => {
+        if (!drag) return;
+        // короткое касание без сдвига — переносим линию в точку касания
+        if (drag.tap && e.type === 'pointerup' && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 8 && performance.now() - drag.t < 400) {
+          const o = { v: parseFloat(frame.style.getPropertyValue('--pos')) || 50 };
+          if (motion) gsap.to(o, { v: posFrom(e.clientX), duration: 0.35, ease: 'power3.out', onUpdate: () => set(o.v) });
+          else set(posFrom(e.clientX));
+        }
+        drag = null;
+        frame.classList.remove('is-drag');
+      };
+      frame.addEventListener('pointerup', end);
+      frame.addEventListener('pointercancel', end);
     });
   }
 
   /* ---------- 7. Ленты со стрелками ---------- */
   function initStrips() {
-    $$('[data-target]').forEach((btn) => {
-      const strip = document.getElementById(btn.dataset.target);
+    const groups = {};
+    $$('[data-target]').forEach((btn) => (groups[btn.dataset.target] ||= []).push(btn));
+    Object.entries(groups).forEach(([id, btns]) => {
+      const strip = document.getElementById(id);
       if (!strip) return;
-      btn.addEventListener('click', () => {
+      btns.forEach((btn) => btn.addEventListener('click', () => {
         const item = strip.firstElementChild;
         const gap = parseFloat(getComputedStyle(strip).columnGap) || 20;
         const step = item ? item.getBoundingClientRect().width + gap : 320;
         strip.scrollBy({ left: step * Number(btn.dataset.dir), behavior: motion ? 'smooth' : 'auto' });
+      }));
+      // стрелка гаснет, когда дальше листать некуда
+      const update = () => {
+        const max = strip.scrollWidth - strip.clientWidth - 4;
+        btns.forEach((b) => { b.disabled = b.dataset.dir === '-1' ? strip.scrollLeft <= 4 : strip.scrollLeft >= max; });
+      };
+      strip.addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update);
+      update();
+    });
+  }
+
+  /* ---------- 7а. До и после: главный пример раскрывается прокруткой ---------- */
+  function initResults() {
+    const stage = $('#resultsStage'), feat = $('#compareFeature');
+    if (!stage || !feat) return;
+    feat.compareSet(0);
+    const aside = $('.results-aside');
+    const o = { v: 0 };
+    gsap.timeline({
+      scrollTrigger: { trigger: stage, start: 'top top', end: () => '+=' + innerHeight * 1.2, pin: true, scrub: 1, invalidateOnRefresh: true }
+    })
+      .to({}, { duration: 0.08 })
+      .to(o, { v: 100, duration: 0.82, ease: 'power1.inOut', onUpdate: () => { feat.compareSet(o.v); aside?.style.setProperty('--p', o.v / 100); } })
+      .to({}, { duration: 0.1 }); // пауза на «после», прежде чем секция открепится
+  }
+
+  /* ---------- 7б. Процедуры: появление строк и смена картинки у списка ---------- */
+  function initServices() {
+    const media = $('.services-media');
+    const rows = $$('.price-row');
+    // картинка в арке: detail-products → process-hair, когда список пролистан до середины
+    if (media && rows[3]) {
+      ScrollTrigger.create({
+        trigger: rows[3], start: 'top 60%',
+        onEnter: () => media.classList.add('is-b'), onLeaveBack: () => media.classList.remove('is-b')
       });
+    }
+    if (!motion) return;
+    // строки по очереди: линия прорисовывается, затем текст поднимается на 16 px
+    ScrollTrigger.batch(rows, {
+      start: 'top 90%', once: true,
+      onEnter: (batch) => batch.forEach((row, i) => {
+        const btn = $('.price-btn', row);
+        gsap.timeline({ delay: i * 0.08 })
+          .to(row, { '--line': 1, duration: 0.9, ease: 'expo.out' }, 0)
+          .to([$('.price-num', btn), $('.price-main', btn), $('.price-cost', btn)], { opacity: 1, y: 0, duration: 0.9, stagger: 0.06, ease: 'power3.out' }, 0.18)
+          .to($('.price-arrow', btn), { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.4);
+      })
     });
   }
 
@@ -454,6 +549,7 @@
 
   if (!motion) {
     // режим без анимаций: всё видно сразу, шапка работает на обычной прокрутке
+    if (hasGsap) { gsap.registerPlugin(ScrollTrigger); initServices(); }
     onScrollHeader(scrollY);
     addEventListener('scroll', () => onScrollHeader(scrollY), { passive: true });
     return;
@@ -472,7 +568,10 @@
     gsap.ticker.lagSmoothing(0);
     if (menuOpen || modal.classList.contains('is-open')) lenis.stop();
 
+    // порядок важен: закрепления создаём сверху вниз
     initHeroScroll();
+    initResults();
+    initServices();
     initReveals();
     initAccordions();
     ScrollTrigger.refresh();
