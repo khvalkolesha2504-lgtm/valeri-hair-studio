@@ -312,14 +312,12 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
 .services-pic{position:absolute;inset:0}
 .services-pic img{width:100%;height:100%;object-fit:cover}
 .services-pic--a{display:none}
-@media (max-width:1023px){.services-arch{max-width:420px;aspect-ratio:3/3.6;margin-inline:auto}}
+@media (max-width:1023px){.services-media{display:none}}
 @media (min-width:1024px){
   .services-layout{grid-template-columns:minmax(260px,.78fr) minmax(0,1.6fr);grid-template-areas:"media head" "media list";column-gap:clamp(48px,6vw,112px);row-gap:0;align-items:start}
   .services-media{position:sticky;top:calc(var(--header-h) + 6vh);height:calc(100vh - var(--header-h) - 12vh);display:flex;align-items:center}
   .services-arch{width:100%;height:min(100%,640px)}
   .services-pic--a{display:block}
-  .services-pic--b{opacity:0;transition:opacity .6s var(--ease)}
-  .services-media.is-b .services-pic--b{opacity:1}
 }
 .price-list{margin-top:8px;border-bottom:1px solid var(--line-strong)}
 @media (min-width:1024px){.price-list{margin-top:clamp(48px,5vw,72px)}}
@@ -328,9 +326,22 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
 .price-row::before,.price-row::after{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--line-strong);transform-origin:left}
 .price-row::before{transform:scaleX(var(--line))}
 .price-row::after{background:var(--gold);transform:scaleX(0);transition:transform .5s var(--ease)}
-.price-btn{display:grid;grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"num main main" ". cost more";gap:14px 14px;align-items:center;
+.price-btn{display:grid;grid-template-columns:76px minmax(0,1fr) auto;grid-template-areas:"num main main" "cost cost more";gap:14px 14px;align-items:center;
   width:calc(100% + 24px);margin-inline:-12px;padding:28px 12px;border:0;border-radius:2px;background:transparent;text-align:left;cursor:pointer;transition:background-color .35s var(--ease)}
-.price-num{grid-area:num;align-self:start;font:500 12px/1 var(--sans);letter-spacing:.12em;color:var(--coffee);padding-top:.9em}
+.price-num{display:none}
+/* значок процедуры — как на текущем сайте: буква и короткая подпись в арочной плашке */
+.price-visual{grid-area:num;align-self:start;position:relative;overflow:hidden;display:grid;place-content:center;text-align:center;min-height:96px;
+  border-radius:48% 48% 8px 8px/25% 25% 8px 8px;background:linear-gradient(145deg,#d1bdab,#f2e9df)}
+.price-visual::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 68% 22%,rgba(255,255,255,.65),transparent 24%),linear-gradient(135deg,transparent,rgba(121,100,85,.15))}
+.price-visual b,.price-visual small{position:relative;z-index:2}
+.price-visual b{font:500 34px/.8 var(--serif);color:#5b493d}
+.price-visual small{margin-top:8px;font:500 7.5px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:#796455}
+.v-biotin{background:linear-gradient(145deg,#e9ded3,#c6ad96)}
+.v-strotex{background:linear-gradient(145deg,#c4a98f,#eee3d7)}
+.v-viva{background:linear-gradient(145deg,#eadbca,#bca18a)}
+.v-keratin{background:linear-gradient(145deg,#9c806b,#e5d5c5)}
+.v-total{background:linear-gradient(145deg,#e4d1bd,#af8f70)}
+.v-peel{background:linear-gradient(145deg,#d9cbbb,#f5eee7)}
 .price-main{grid-area:main;align-self:start;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
 .price-badge{display:inline-block;padding:6px 10px;border:1px solid var(--gold);border-radius:999px;font:500 9.5px/1.2 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep)}
 @media (max-width:767px){.price-badge{font-size:9px;letter-spacing:.1em;padding:6px 9px;border-radius:8px}}
@@ -339,21 +350,24 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
   .price-list{display:grid;gap:12px;border-bottom:0}
   .price-row{background:var(--paper);border:1px solid var(--line-strong);border-radius:18px;overflow:hidden}
   .price-row::before,.price-row::after{display:none}
-  .price-btn{width:100%;margin:0;padding:22px 18px 18px;grid-template-columns:30px minmax(0,1fr) auto}
-  .price-cost{font-size:24px}
+  .price-btn{width:100%;margin:0;padding:18px 16px 16px;grid-template-columns:72px minmax(0,1fr) auto;column-gap:14px}
 }
 .price-name{font:300 clamp(28px,3vw,44px)/1.05 var(--serif)}
 .price-desc{max-width:52ch;font-size:15px;line-height:1.6;color:var(--coffee)}
 .price-meta{font:500 10.5px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--coffee);opacity:.85}
-.price-cost{grid-area:cost;font:400 clamp(22px,2vw,28px)/1 var(--serif);white-space:nowrap}
+/* цена — крупно и на светлой плашке, чтобы сразу бросалась в глаза */
+.price-cost{grid-area:cost;justify-self:start;padding:9px 16px 8px;border-radius:999px;background:var(--beige);font:500 clamp(24px,2.2vw,32px)/1 var(--serif);color:var(--graphite);white-space:nowrap}
 /* кнопка «Подробнее»: сразу видно, что строку можно открыть */
 .price-more{grid-area:more;justify-self:end;display:inline-flex;align-items:center;gap:8px;padding:11px 16px;border:1px solid var(--graphite);border-radius:999px;
   font:500 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;color:var(--graphite);
   transition:background-color .35s var(--ease),color .35s var(--ease)}
 .price-more i{font-style:normal;transition:transform .35s var(--ease)}
 @media (min-width:768px){
-  .price-btn{grid-template-columns:56px minmax(0,1fr) auto;grid-template-areas:"num main cost" "num main more";align-items:start;row-gap:18px;width:calc(100% + 40px);margin-inline:-20px;padding:34px 20px}
-  .price-cost{padding-top:.35em;text-align:right;justify-self:end}
+  .price-visual{min-height:132px}
+  .price-visual b{font-size:44px}
+  .price-visual small{font-size:8px}
+  .price-btn{grid-template-columns:104px minmax(0,1fr) auto;column-gap:28px;grid-template-areas:"num main cost" "num main more";align-items:start;row-gap:18px;width:calc(100% + 40px);margin-inline:-20px;padding:34px 20px}
+  .price-cost{text-align:right;justify-self:end}
   .price-more{align-self:end}
 }
 @media (hover:hover){
@@ -364,7 +378,7 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
 }
 /* начальные состояния для появления строк (только в режиме анимаций) */
 html.motion .price-row{--line:0}
-html.motion .price-btn>.price-num,html.motion .price-btn>.price-main,html.motion .price-btn>.price-cost{opacity:0;transform:translateY(16px)}
+html.motion .price-btn>.price-visual,html.motion .price-btn>.price-main,html.motion .price-btn>.price-cost{opacity:0;transform:translateY(16px)}
 html.motion .price-btn>.price-more{opacity:0}
 
 /* ---------- 10. Окно процедуры: панель справа (на телефоне снизу) ---------- */

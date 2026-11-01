@@ -397,15 +397,7 @@
 
   /* ---------- 7б. Процедуры: появление строк и смена картинки у списка ---------- */
   function initServices() {
-    const media = $('.services-media');
     const rows = $$('.price-row');
-    // картинка в арке: detail-products → process-hair, когда список пролистан до середины
-    if (media && rows[3]) {
-      ScrollTrigger.create({
-        trigger: rows[3], start: 'top 60%',
-        onEnter: () => media.classList.add('is-b'), onLeaveBack: () => media.classList.remove('is-b')
-      });
-    }
     if (!motion) return;
     // строки по очереди: линия прорисовывается, затем текст поднимается на 16 px, затем кнопка «Подробнее»
     ScrollTrigger.batch(rows, {
@@ -414,7 +406,7 @@
         const btn = $('.price-btn', row);
         gsap.timeline({ delay: i * 0.08 })
           .to(row, { '--line': 1, duration: 0.9, ease: 'expo.out' }, 0)
-          .to([$('.price-num', btn), $('.price-main', btn), $('.price-cost', btn)], { opacity: 1, y: 0, duration: 0.9, stagger: 0.06, ease: 'power3.out' }, 0.18)
+          .to([$('.price-visual', btn), $('.price-main', btn), $('.price-cost', btn)], { opacity: 1, y: 0, duration: 0.9, stagger: 0.06, ease: 'power3.out' }, 0.18)
           .to($('.price-more', btn), { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.4);
       })
     });
