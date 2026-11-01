@@ -237,10 +237,24 @@ ol,ul{padding:0;list-style:none}
 /* золотой контур арки, как LED-подсветка зеркал в студии */
 .arch-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .arch-line{fill:none;stroke:#e9c98a;stroke-width:1.4;filter:drop-shadow(0 0 6px rgba(240,200,120,.75)) drop-shadow(0 0 18px rgba(240,190,100,.35))}
+/* «Живая вывеска»: тёплая стена, лучи света и ореол за вывеской (видны только во вступлении) */
+.wall{position:absolute;inset:0;opacity:0;pointer-events:none;
+  background:radial-gradient(75% 55% at var(--sign-x,50%) var(--sign-y,45%),#4a3729 0%,#33251b 48%,#21170f 100%)}
+.wall i{position:absolute;opacity:0}
+.rays{inset:-20%;
+  background:repeating-linear-gradient(118deg,rgba(255,214,160,0) 0,rgba(255,214,160,.075) 60px,rgba(255,214,160,0) 120px,rgba(255,214,160,0) 170px);
+  -webkit-mask:radial-gradient(60% 50% at 38% 32%,#000,transparent);mask:radial-gradient(60% 50% at 38% 32%,#000,transparent)}
+.halo{left:calc(var(--sign-x,50%) - var(--sign-r,120px) * 1.7);top:calc(var(--sign-y,45%) - var(--sign-r,120px) * 1.7);
+  width:calc(var(--sign-r,120px) * 3.4);height:calc(var(--sign-r,120px) * 3.4);border-radius:50%;
+  background:radial-gradient(closest-side,rgba(255,200,125,.34),rgba(255,186,105,.12) 55%,rgba(255,186,105,0))}
+html:not(.motion) .wall{display:none}
+/* объёмная монограмма поверх плоской (плоская остаётся для экранных дикторов и как запасной вариант) */
+.sign-gl{position:absolute;left:50%;top:calc(var(--mono-w,200px) * .4937);transform:translate(-50%,-50%);opacity:0;pointer-events:none}
+.sign-gl canvas{display:block;max-width:none;will-change:transform}
 /* монограмма и подпись внутри арки */
 .mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:clamp(18px,3vh,30px);text-align:center;will-change:transform,opacity}
 .mono{width:var(--mono-w,200px);height:auto;overflow:visible;filter:drop-shadow(0 0 22px rgba(240,190,100,.18))}
-.word{font:500 clamp(11px,1vw,13px)/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--gold-light);margin:0;white-space:nowrap}
+.word{margin-top:calc(var(--mono-w,200px) * .2)!important;font:500 clamp(11px,1vw,13px)/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--gold-light);margin:0;white-space:nowrap}
 .sub{font:300 clamp(12px,1.05vw,14px)/1.4 var(--sans);letter-spacing:.06em;color:rgba(250,247,242,.62);margin:0;white-space:nowrap}
 /* текст, который появляется после прохода сквозь арку */
 .copy{position:absolute;left:var(--gutter);right:var(--gutter);bottom:clamp(36px,8vh,88px);max-width:820px}
@@ -333,13 +347,39 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
    с подсветкой и золотая буква, по которой проходит блик (как по монограмме во вступлении) */
 .price-visual{grid-area:num;align-self:start;position:relative;display:grid;place-content:center;text-align:center;min-height:96px;
   border-radius:999px 999px 10px 10px;background:linear-gradient(165deg,#4a3b31 0%,#352a23 55%,#281f1a 100%);box-shadow:0 10px 24px rgba(29,25,22,.18)}
-.price-visual::after{content:"";position:absolute;inset:6px;border:1px solid rgba(233,201,138,.6);border-radius:999px 999px 6px 6px;
+.price-visual::after{content:"";position:absolute;inset:6px;border:1px solid rgba(233,201,138,.35);border-radius:999px 999px 6px 6px;
   box-shadow:0 0 10px rgba(240,200,120,.22),inset 0 0 10px rgba(240,200,120,.12);pointer-events:none}
 .price-visual b,.price-visual small{position:relative;z-index:2}
 .price-visual b{padding-top:10px;font:500 32px/.9 var(--serif);
   background:linear-gradient(110deg,#b98a5b 0%,#f0d38c 30%,#fff3d1 45%,#f0d38c 60%,#c49a5e 100%);background-size:260% 100%;background-position:0 0;
   -webkit-background-clip:text;background-clip:text;color:transparent}
 .price-visual small{margin-top:7px;font:500 7px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(240,211,140,.72)}
+/* «Подсветка»: светодиодный контур арки зажигается с мерцанием, внутри разливается тёплый свет,
+   под значком — отблеск. Без анимаций всё сразу горит */
+.price-visual i{position:absolute;pointer-events:none}
+.pv-led{inset:6px;z-index:1;border:1.4px solid #f2d49a;border-radius:999px 999px 6px 6px;
+  box-shadow:0 0 8px rgba(240,200,120,.85),0 0 22px rgba(240,190,100,.45),inset 0 0 12px rgba(240,200,120,.35);transition:box-shadow .4s var(--ease)}
+.pv-in{inset:7px;z-index:1;border-radius:999px 999px 5px 5px;background:radial-gradient(70% 55% at 50% 38%,rgba(255,205,135,.36),rgba(255,205,135,0));transition:opacity .4s var(--ease)}
+.pv-spill{left:-30%;right:-30%;bottom:-14px;height:26px;border-radius:50%;background:radial-gradient(closest-side,rgba(240,190,110,.45),rgba(240,190,110,0))}
+html.motion .price-row:not(.is-lit) .pv-led,html.motion .price-row:not(.is-lit) .pv-in,html.motion .price-row:not(.is-lit) .pv-spill{opacity:0}
+.price-row.is-lit .pv-led{animation:led-on 1s linear both}
+.price-row.is-lit .pv-in,.price-row.is-lit .pv-spill{animation:led-glow .9s .2s var(--ease) both}
+.price-row.is-flick .pv-led{animation:led-flick .5s linear both}
+.price-row.is-flick .price-cost{animation:cost-flash .9s var(--ease) both}
+@keyframes led-on{0%{opacity:0}6%{opacity:.8}12%{opacity:.1}17%{opacity:.95}25%{opacity:.3}45%,100%{opacity:1}}
+@keyframes led-flick{0%{opacity:1}12%{opacity:.15}24%{opacity:.9}36%{opacity:.35}60%,100%{opacity:1}}
+@keyframes led-glow{from{opacity:0}to{opacity:1}}
+@keyframes cost-flash{0%{background:var(--beige);box-shadow:0 0 0 0 rgba(227,191,108,0)}
+  30%{background:#f3dfae;box-shadow:0 0 0 5px rgba(227,191,108,.28),0 0 26px rgba(227,191,108,.55)}
+  100%{background:var(--beige);box-shadow:0 0 0 0 rgba(227,191,108,0)}}
+/* на компьютере тёплое пятно света идёт за мышкой по строке */
+.price-btn{position:relative;isolation:isolate}
+.price-btn::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;opacity:0;pointer-events:none;transition:opacity .45s var(--ease);
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),rgba(236,192,118,.22),rgba(236,192,118,0) 70%)}
+@media (hover:hover){
+  .price-row:hover .price-btn::before{opacity:1}
+  .price-row:hover .pv-led{box-shadow:0 0 10px rgba(240,200,120,.95),0 0 30px rgba(240,190,100,.6),inset 0 0 16px rgba(240,200,120,.45)}
+}
 @keyframes vshine{from{background-position:100% 0}to{background-position:0 0}}
 @keyframes vshine-hover{from{background-position:100% 0}to{background-position:0 0}}
 .price-row.is-shine .price-visual b{animation:vshine 1.3s var(--ease) both}
@@ -617,5 +657,5 @@ html.lenis,html.lenis body{height:auto}
   .mobile-bar{transform:none;opacity:0;pointer-events:none}
   .mobile-bar.is-visible{opacity:1;pointer-events:auto}
   .btn::before,.btn span,.link-arrow span,.price-more,.price-more i,.price-row::after{transition:none}
-  .price-visual b{animation:none!important}
+  .price-visual b,.price-visual i,.price-cost{animation:none!important}
 }

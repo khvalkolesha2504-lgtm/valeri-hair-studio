@@ -109,19 +109,50 @@
   const archLine = $('#archLine'), mark = $('#mark');
 
   /* геометрия арки: ширина : высота ≈ 1 : 1.9, верх полукруглый */
-  let A = {};
+  let A = {}, C = {};
   const state = { reveal: 0 };
+  const ring = { m: 0 }; // 0 — круглое кольцо вывески, 1 — контур арки
+  let sign = null;       // объёмная вывеска (sign.js), если устройство её тянет
   function archBox() {
     const W = innerWidth, H = innerHeight;
     const h = mobile() ? Math.min(H * 0.64, W * 0.66 * 1.9) : H * 0.72;
     const w = h / 1.9;
     const x = (W - w) / 2, y = (H - h) / 2 + (mobile() ? -H * 0.02 : 0);
     A = { W, H, x, y, w, h, r: w / 2 };
-    // контур арки: снизу слева → вверх → полукруг → вниз справа
-    archLine.setAttribute('d', `M${x},${y + h} V${y + A.r} A${A.r},${A.r} 0 0 1 ${x + w},${y + A.r} V${y + h}`);
+    const monoW = w * 0.56, monoH = monoW * 1121.7 / 1135.9;
+    root.style.setProperty('--mono-w', monoW + 'px');
+    // кольцо вывески — вокруг монограммы (она стоит над подписью, поэтому центр выше середины экрана)
+    C = { x: W / 2, y: H / 2 - mark.offsetHeight / 2 + monoH / 2, R: monoW * 0.68 };
+    hero.style.setProperty('--sign-x', C.x + 'px');
+    hero.style.setProperty('--sign-y', C.y + 'px');
+    hero.style.setProperty('--sign-r', C.R + 'px');
+    if (sign) sign.resize(Math.round(monoW * 1.5));
     $('#archSvg').setAttribute('viewBox', `0 0 ${W} ${H}`);
-    root.style.setProperty('--mono-w', (w * 0.56) + 'px');
+    setRing(ring.m);
     setReveal(state.reveal);
+  }
+
+  /* золотая линия: кольцо вывески плавно перетекает в контур арки.
+     Обе фигуры проходятся в одном направлении: снизу слева → вверх → по дуге → вниз справа */
+  function setRing(m) {
+    ring.m = m;
+    if (m >= 1) { // точный контур арки, как раньше
+      archLine.setAttribute('d', `M${A.x},${A.y + A.h} V${A.y + A.r} A${A.r},${A.r} 0 0 1 ${A.x + A.w},${A.y + A.r} V${A.y + A.h}`);
+      return;
+    }
+    const n = 160, side = A.h - A.r, arc = Math.PI * A.r, L = 2 * side + arc;
+    let d = '';
+    for (let i = 0; i <= n; i++) {
+      const s = i / n, k = s * L;
+      let ax, ay;
+      if (k < side) { ax = A.x; ay = A.y + A.h - k; }
+      else if (k < side + arc) { const a = Math.PI + (k - side) / A.r; ax = A.x + A.r + A.r * Math.cos(a); ay = A.y + A.r + A.r * Math.sin(a); }
+      else { ax = A.x + A.w; ay = A.y + A.r + (k - side - arc); }
+      const t = Math.PI / 2 + s * Math.PI * 2;
+      const cx = C.x + C.R * Math.cos(t), cy = C.y + C.R * Math.sin(t);
+      d += (i ? 'L' : 'M') + (cx + (ax - cx) * m).toFixed(1) + ',' + (cy + (ay - cy) * m).toFixed(1);
+    }
+    archLine.setAttribute('d', d);
   }
 
   /* вырез фото: p=0 — форма арки, p=1 — весь экран */
@@ -203,26 +234,85 @@
       const was = run; run = e.isIntersecting;
       hero.classList.toggle('is-off', !run); // пауза «живого фото», пока первый экран не виден
       if (run && !was) { last = 0; requestAnimationFrame(loop); }
+      signRun();
     }).observe(hero);
   }
 
-  let intro = null;
+  let intro = null, signOn = false, signVisible = true;
+  // вывеска рисуется только когда её видно: первый экран на экране и монограмма ещё не ушла
+  function signRun() {
+    if (!sign || !signOn) return;
+    if (signVisible && !hero.classList.contains('is-off')) sign.start(); else sign.stop();
+  }
+
   function initHeroIntro() {
     const svg = $('.mono', hero);
+    // объёмная вывеска: создаём до «шторок» — sign.js копирует монограмму в её исходном виде
+    let wrap = null;
+    try { sign = window.VHSSign ? VHSSign.create(svg) : null; } catch (e) { sign = null; }
+    if (sign) {
+      wrap = document.createElement('div');
+      wrap.className = 'sign-gl'; wrap.setAttribute('aria-hidden', 'true');
+      wrap.appendChild(sign.canvas); mark.insertBefore(wrap, svg);
+    }
     archBox();
     const len = archLine.getTotalLength();
-    gsap.set(archLine, { strokeDasharray: len, strokeDashoffset: len });
+    gsap.set(archLine, { strokeDasharray: len, strokeDashoffset: len, opacity: 0.5 });
     gsap.set(mark, { opacity: 1 });
     gsap.set(['#word', '#sub'], { opacity: 0 });
     gsap.set(photo, { opacity: 0 });
+
+    // включение вывески: плоская монограмма прячется (остаётся для экранных дикторов), видна объёмная
+    let decided = !sign, ready = false;
+    const useSign = (ok) => {
+      decided = true;
+      if (!sign) return;
+      if (!ok) { sign.destroy(); sign = null; wrap.remove(); return; }
+      signOn = true;
+      gsap.set(svg, { opacity: 0 });
+      gsap.to(wrap, { opacity: 1, duration: intro.progress() < 1 ? 0.45 : 0, ease: 'power1.out' });
+      signRun();
+    };
+    // в момент включения картинка обычно уже готова; если нет — ждём не дольше 0,7 с, иначе плоская монограмма
+    const decide = () => {
+      if (decided) return;
+      if (ready) return useSign(true);
+      intro.pause();
+      let done = false;
+      const go = (ok) => { if (done || decided) return; done = true; useSign(ok); intro.resume(); };
+      sign.ready.then(() => go(true), () => go(false));
+      setTimeout(() => go(false), 700);
+    };
+    if (sign) sign.ready.then(() => { ready = true; if (!decided && intro.progress() === 1) useSign(true); }, () => { if (!signOn) useSign(false); });
+    const S = sign ? sign.state : { on: 0, sweep: -1 };
+    const neon = [{ v: 0.75, d: 0.06 }, { v: 0.1, d: 0.08 }, { v: 0.95, d: 0.06 }, { v: 0.3, d: 0.1 }, { v: 1, d: 0.35 }];
+    const flick = (key) => neon.map(f => ({ [key]: f.v, duration: f.d }));
+
     const wipes = {
       thin: makeWipe(svg, svg.getElementById('x-thin'), [-0.62, 1]),   // сверху справа вниз влево
       ribbon: makeWipe(svg, svg.getElementById('x-ribbon'), [0.55, 1]), // сверху слева вниз
       v: makeWipe(svg, svg.getElementById('v'), [0, 1])                  // сверху вниз к острию
     };
     const shine = makeShine(svg);
-    intro = gsap.timeline({ defaults: { ease: 'power3.out' } })
+    let after = false;
+    const afterIntro = () => {
+      if (after) return; after = true;
+      gsap.set(archLine, { strokeDasharray: 'none', opacity: 1 });
+      // раз в несколько секунд по золоту снова пробегает блик
+      if (sign) gsap.fromTo(S, { sweep: -0.8 }, { sweep: 1.7, duration: 1.6, ease: 'power2.inOut', repeat: -1, repeatDelay: 5, delay: 3 });
+    };
+    intro = gsap.timeline({ defaults: { ease: 'power3.out' }, onComplete: afterIntro })
+      // стена проступает из темноты, золотое кольцо вывески прорисовывается
+      .to('#wall', { opacity: 1, duration: 1.6, ease: 'power1.out' }, 0)
       .to(archLine, { strokeDashoffset: 0, duration: 1.4, ease: 'power2.inOut' }, 0.2)
+      .call(decide, null, 1.0) // с этого момента буквы видны тёмным силуэтом — вывеска ещё выключена
+      // щелчок: подсветка вспыхивает с неоновым мерцанием
+      .to(S, { keyframes: flick('on'), ease: 'none' }, 1.4)
+      .to('#halo', { keyframes: flick('opacity'), ease: 'none' }, 1.4)
+      .to(archLine, { keyframes: flick('opacity'), ease: 'none' }, 1.4)
+      .to('#rays', { opacity: 1, duration: 2.2, ease: 'power2.out' }, 1.5)
+      .fromTo(S, { sweep: -0.8 }, { sweep: 1.7, duration: 1.4, ease: 'power2.inOut', immediateRender: false }, 2.0)
+      // запасной вариант без WebGL: плоская монограмма проявляется «шторками»
       .to(wipes.thin.o, { t: 1, duration: 0.9, onUpdate: wipes.thin.draw }, 1.1)
       .to(wipes.ribbon.o, { t: 1, duration: 0.9, onUpdate: wipes.ribbon.draw }, 1.25)
       .to(wipes.v.o, { t: 1, duration: 0.9, onUpdate: wipes.v.draw }, 1.4)
@@ -235,11 +325,16 @@
     if (performance.now() > 3000) intro.timeScale(intro.timeScale() * 2);
     try { if (sessionStorage.getItem('valeri-intro')) intro.timeScale(5); sessionStorage.setItem('valeri-intro', '1'); } catch (e) {}
     // если человек начал листать во время вступления — сразу к концу
-    const skip = () => { if (intro.progress() < 1) intro.progress(1); };
+    const skip = () => {
+      if (intro.progress() < 1) intro.progress(1);
+      afterIntro();
+      if (!decided && ready) useSign(true);
+    };
     ['wheel', 'touchstart', 'keydown'].forEach(ev => addEventListener(ev, skip, { once: true, passive: true }));
     // страница открылась не в начале (обновление, переход по ссылке с #) — вступление не нужно
     if (scrollY > innerHeight * 0.5 || location.hash.length > 1) skip();
     dust();
+    if (/[?&]capture/.test(location.search)) window.VHS_DEBUG = { intro, sign: () => sign, ring, setRing };
   }
 
   /* «проход сквозь арку» при прокрутке */
@@ -253,19 +348,25 @@
     const r = { p: 0 };
     gsap.timeline({
       defaults: { ease: 'none' },
-      scrollTrigger: { trigger: hero, start: 'top top', end: () => '+=' + pinLength(), pin: true, scrub: 1, invalidateOnRefresh: true }
+      scrollTrigger: {
+        trigger: hero, start: 'top top', end: () => '+=' + pinLength(), pin: true, scrub: 1, invalidateOnRefresh: true,
+        onUpdate: (self) => { const v = self.progress < 0.12; if (v !== signVisible) { signVisible = v; signRun(); } }
+      }
     })
-      .to(mark, { opacity: 0, y: -60, duration: 0.18 }, 0)
+      // вывеска уходит вверх, а её кольцо вытягивается в контур арки
+      .to(mark, { opacity: 0, y: -50, scale: 0.94, duration: 0.16 }, 0)
       .to('#cue', { opacity: 0, duration: 0.08 }, 0)
-      .fromTo(photo, { opacity: 0 }, { opacity: 1, duration: 0.16 }, 0.02)
-      .fromTo(photoScale, { scale: 1.3 }, { scale: 1, duration: 0.55, ease: 'power1.out' }, 0.08)
-      .to(r, { p: 1, duration: 0.5, ease: 'power2.inOut', onUpdate: () => setReveal(r.p) }, 0.12)
-      .to('#archSvg', { opacity: 0, scale: 1.35, transformOrigin: '50% 50%', duration: 0.26 }, 0.12)
-      .to('#shade', { opacity: 1, duration: 0.2 }, 0.52)
-      .to('#copy .eyebrow', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.62)
-      .to(split.lines, { yPercent: 0, duration: 0.18, stagger: 0.05, ease: 'power3.out' }, 0.66)
-      .to('#copy .lead', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.8)
-      .to('#copy .actions', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.86)
+      .to(ring, { m: 1, duration: 0.2, ease: 'power2.inOut', onUpdate: () => setRing(ring.m) }, 0)
+      .to(['#halo', '#rays'], { opacity: 0, duration: 0.18 }, 0.04)
+      .fromTo(photo, { opacity: 0 }, { opacity: 1, duration: 0.14 }, 0.13)
+      .fromTo(photoScale, { scale: 1.3 }, { scale: 1, duration: 0.55, ease: 'power1.out' }, 0.14)
+      .to(r, { p: 1, duration: 0.5, ease: 'power2.inOut', onUpdate: () => setReveal(r.p) }, 0.18)
+      .to('#archSvg', { opacity: 0, scale: 1.35, transformOrigin: '50% 50%', duration: 0.26 }, 0.2)
+      .to('#shade', { opacity: 1, duration: 0.2 }, 0.56)
+      .to('#copy .eyebrow', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.64)
+      .to(split.lines, { yPercent: 0, duration: 0.18, stagger: 0.05, ease: 'power3.out' }, 0.68)
+      .to('#copy .lead', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.82)
+      .to('#copy .actions', { opacity: 1, y: 0, duration: 0.12, ease: 'power2.out' }, 0.88)
       .to({}, { duration: 0.1 }); // небольшая пауза, прежде чем секция открепится
   }
 
@@ -410,6 +511,22 @@
           .to($('.price-more', btn), { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.4)
           .call(() => row.classList.add('is-shine'), null, 0.55); // блик по золотой букве значка
       })
+    });
+    // «Подсветка»: значок зажигается, когда строка доходит примерно до середины экрана
+    rows.forEach((row) => {
+      ScrollTrigger.create({ trigger: row, start: 'top 68%', once: true, onEnter: () => row.classList.add('is-lit') });
+      const btn = $('.price-btn', row);
+      // касание или наведение — подсветка коротко мигает, плашка с ценой вспыхивает золотом
+      const flick = () => { row.classList.remove('is-flick'); void row.offsetWidth; row.classList.add('is-flick'); };
+      btn.addEventListener('pointerdown', flick);
+      btn.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') flick(); });
+      // пятно света за мышкой
+      btn.addEventListener('pointermove', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        const r = btn.getBoundingClientRect();
+        btn.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        btn.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
     });
   }
 
