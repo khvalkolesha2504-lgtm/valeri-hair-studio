@@ -407,7 +407,8 @@
         gsap.timeline({ delay: i * 0.08 })
           .to(row, { '--line': 1, duration: 0.9, ease: 'expo.out' }, 0)
           .to([$('.price-visual', btn), $('.price-main', btn), $('.price-cost', btn)], { opacity: 1, y: 0, duration: 0.9, stagger: 0.06, ease: 'power3.out' }, 0.18)
-          .to($('.price-more', btn), { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.4);
+          .to($('.price-more', btn), { opacity: 1, duration: 0.6, ease: 'power2.out' }, 0.4)
+          .call(() => row.classList.add('is-shine'), null, 0.55); // блик по золотой букве значка
       })
     });
   }
