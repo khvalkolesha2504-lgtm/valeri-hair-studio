@@ -546,29 +546,8 @@
       }
     });
 
-    const mm = gsap.matchMedia();
-    mm.add('(min-width: 1024px)', () => {
-      // насколько нужно сдвинуть ленту, чтобы показать последнее фото
-      const distance = () => {
-        const last = track.lastElementChild.getBoundingClientRect(), box = flow.getBoundingClientRect();
-        const padR = parseFloat(getComputedStyle(flow).paddingRight) || 0;
-        return Math.max(0, last.right - box.left + padR - innerWidth);
-      };
-      const move = gsap.to(flow, {
-        x: () => -distance(), ease: 'none',
-        scrollTrigger: {
-          trigger: stage, start: 'top top', end: () => '+=' + distance() * 0.6,
-          pin: true, scrub: 1, invalidateOnRefresh: true
-        }
-      });
-      // параллакс: фото внутри арки отстаёт от рамки примерно на 8 %
-      $$('.studio-shot', track).forEach((shot) => {
-        gsap.fromTo($('img', shot), { xPercent: -7 }, {
-          xPercent: 7, ease: 'none',
-          scrollTrigger: { trigger: shot, containerAnimation: move, start: 'left right', end: 'right left', scrub: true }
-        });
-      });
-    });
+    // раньше на компьютере раздел закреплялся и лента ехала по горизонтали при прокрутке —
+    // по просьбе владельца убрано: страница листается дальше сразу, фото — стрелками и свайпом
   }
 
   /* ---------- 7г. Запись: фон чуть медленнее прокрутки ---------- */
