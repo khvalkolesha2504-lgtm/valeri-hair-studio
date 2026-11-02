@@ -604,7 +604,7 @@
     $('#modalTitle').textContent = s.title;
     $('#modalLead').textContent = s.lead;
     let html = '';
-    if (s.highlight) html += `<div class="modal-highlight"><span>Первое в Беларуси</span><p>${s.highlight}</p></div>`;
+    if (s.highlight) html += `<div class="modal-highlight"><span>Первая в Беларуси</span><p>${s.highlight}</p></div>`;
     s.groups.forEach(([title, items]) => { html += `<div class="modal-group"><h3>${title}</h3><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></div>`; });
     html += `<div class="modal-group"><h3>Стоимость</h3><table class="price-table"><tbody>${s.price.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</tbody></table></div>`;
     if (s.note) html += `<div class="modal-callout">${s.note}</div>`;
