@@ -320,7 +320,7 @@
       .fromTo('#word', { opacity: 0, letterSpacing: '0.6em' }, { opacity: 1, letterSpacing: '0.32em', duration: 1.0 }, 2.2)
       .fromTo('#sub', { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.8 }, 2.45)
       .to([header, '#cue'], { opacity: 1, duration: 0.8 }, 2.6);
-    if (mobile()) intro.timeScale(1.35);
+    if (mobile()) intro.timeScale(1.15); // на телефоне чуть быстрее, но в премиальном темпе (проверено аудитом движения)
     // скрипты пришли с опозданием (медленный интернет) — вступление идёт вдвое быстрее, чтобы не заставлять ждать
     if (performance.now() > 3000) intro.timeScale(intro.timeScale() * 2);
     try { if (sessionStorage.getItem('valeri-intro')) intro.timeScale(5); sessionStorage.setItem('valeri-intro', '1'); } catch (e) {}

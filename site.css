@@ -26,6 +26,7 @@
    20. Появление при прокрутке (только в режиме .motion)
    21. Lenis (плавная прокрутка)
    22. Без анимаций: prefers-reduced-motion
+   23. Читаемость: размеры основного текста на компьютере
    ===================================================================== */
 
 /* ---------- 0. Шрифты ---------- */
@@ -140,8 +141,10 @@ ol,ul{padding:0;list-style:none}
 .btn--sm{min-height:40px;padding:11px 18px;font-size:11px;letter-spacing:.12em}
 .btn--lg{min-height:58px;padding:20px 38px;font-size:13px}
 
-.link-arrow{display:inline-flex;align-items:center;gap:10px;font:500 12px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:6px 0;border-bottom:1px solid currentColor;border-color:color-mix(in srgb,currentColor 35%,transparent)}
+.link-arrow{position:relative;display:inline-flex;align-items:center;gap:10px;font:500 12px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:6px 0;border-bottom:1px solid currentColor;border-color:color-mix(in srgb,currentColor 35%,transparent)}
 .link-arrow span{display:inline-block;transition:transform .3s var(--ease)}
+/* невидимая расширенная зона нажатия для пальца */
+.link-arrow::after{content:"";position:absolute;inset:-9px -6px}
 @media (hover:hover){.link-arrow:hover span{transform:translateX(5px)}}
 
 .round-btn{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;border:1px solid currentColor;border-color:color-mix(in srgb,currentColor 30%,transparent);background:none;cursor:pointer;font:400 18px/1 var(--sans);transition:border-color .3s var(--ease),background-color .3s var(--ease)}
@@ -167,7 +170,7 @@ ol,ul{padding:0;list-style:none}
 .brand-mono{width:auto;height:34px;overflow:visible}
 .brand-word{display:flex;flex-direction:column;line-height:1;font-family:"Cinzel",var(--serif);font-weight:500}
 .brand-word b{font-weight:500;font-size:17px;letter-spacing:.14em}
-.brand-word small{font-size:8.5px;letter-spacing:.32em;margin-top:5px;opacity:.8}
+.brand-word small{font-size:10px;letter-spacing:.3em;margin-top:5px;opacity:.8}
 .nav{display:none;gap:clamp(18px,2vw,34px);font-size:13px;letter-spacing:.02em}
 .nav a{position:relative;text-decoration:none;opacity:.82;padding:6px 0;transition:opacity .25s}
 .nav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .35s var(--ease)}
@@ -189,7 +192,7 @@ ol,ul{padding:0;list-style:none}
 .menu-toggle[aria-expanded="true"] span:first-child{transform:rotate(45deg)}
 .menu-toggle[aria-expanded="true"] span:last-child{transform:rotate(-45deg)}
 @media (min-width:1100px){.menu-toggle{display:none}}
-@media (max-width:420px){.header-ig{display:none}.brand-word b{font-size:15px}.brand-word small{font-size:7.5px}.brand{gap:10px}}
+@media (max-width:420px){.header-ig{display:none}.brand-word b{font-size:15px}.brand-word small{font-size:9px;letter-spacing:.26em}.brand{gap:10px}}
 
 /* мобильное меню: тёмный экран, крупные пункты */
 .menu{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;justify-content:space-between;gap:32px;
@@ -263,7 +266,7 @@ html:not(.motion) .wall{display:none}
 .h1 em{font-style:italic;color:var(--gold-light)}
 .lead{font:300 clamp(15px,1.25vw,18px)/1.6 var(--sans);color:rgba(250,247,242,.82);max-width:520px;margin:22px 0 30px}
 .cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;
-  font:500 10px/1 var(--sans);letter-spacing:.3em;text-transform:uppercase;color:rgba(250,247,242,.55)}
+  font:500 11px/1 var(--sans);letter-spacing:.28em;text-transform:uppercase;color:rgba(250,247,242,.6)}
 .cue i{width:1px;height:42px;background:linear-gradient(var(--gold-light),transparent);transform-origin:top;animation:cue 2.4s var(--ease) infinite}
 @keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
 
@@ -292,7 +295,7 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
 .compare-before{object-position:left center}
 .compare-after{object-position:right center;clip-path:inset(0 0 0 var(--pos))}
 .compare-label{position:absolute;top:14px;z-index:4;padding:7px 12px;border-radius:999px;background:rgba(25,21,18,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-  color:var(--milk);font:500 10px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;pointer-events:none;transition:opacity .35s var(--ease)}
+  color:var(--milk);font:500 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;pointer-events:none;transition:opacity .35s var(--ease)}
 .compare-label--before{left:14px}
 .compare-label--after{right:14px}
 .compare-divider{position:absolute;z-index:5;top:0;bottom:0;left:var(--pos);width:1px;transform:translateX(-.5px);background:rgba(250,247,242,.92);pointer-events:none}
@@ -353,7 +356,7 @@ html:not(.js) .kb,html:not(.js) .light{animation:none}
 .price-visual b{padding-top:10px;font:500 32px/.9 var(--serif);
   background:linear-gradient(110deg,#b98a5b 0%,#f0d38c 30%,#fff3d1 45%,#f0d38c 60%,#c49a5e 100%);background-size:260% 100%;background-position:0 0;
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.price-visual small{margin-top:7px;font:500 7px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(240,211,140,.72)}
+.price-visual small{margin-top:6px;padding:0 4px;font:500 8.5px/1.15 var(--sans);letter-spacing:0;text-transform:none;color:rgba(240,211,140,.72)}
 /* «Подсветка»: светодиодный контур арки зажигается с мерцанием, внутри разливается тёплый свет,
    под значком — отблеск. Без анимаций всё сразу горит */
 .price-visual i{position:absolute;pointer-events:none}
@@ -396,8 +399,8 @@ html.motion .price-row:not(.is-lit) .pv-led,html.motion .price-row:not(.is-lit) 
 .price-seal .seal-inner{fill:none;stroke:#5b3f14;stroke-width:.7;opacity:.55}
 .price-seal .seal-mono{fill:#3a2a12;opacity:.85}
 .price-main{grid-area:main;align-self:center;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
-.price-badge{display:inline-block;padding:6px 10px;border:1px solid var(--gold);border-radius:999px;font:500 9.5px/1.2 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep)}
-@media (max-width:767px){.price-badge{font-size:9px;letter-spacing:.1em;padding:6px 9px;border-radius:8px}}
+.price-badge{display:inline-block;padding:6px 10px;border:1px solid var(--gold);border-radius:999px;font:500 11px/1.2 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep)}
+@media (max-width:767px){.price-badge{font-size:11px;letter-spacing:.08em;padding:6px 9px;border-radius:8px}}
 /* телефон: каждая услуга — отдельная карточка, границы между услугами видны сразу */
 @media (max-width:767px){
   .price-list{display:grid;gap:12px;border-bottom:0}
@@ -418,7 +421,7 @@ html.motion .price-row:not(.is-lit) .pv-led,html.motion .price-row:not(.is-lit) 
 @media (min-width:768px){
   .price-visual{min-height:112px}
   .price-visual b{font-size:38px}
-  .price-visual small{font-size:8px}
+  .price-visual small{font-size:10px}
   .price-seal{width:56px;height:56px;right:-20px;top:-20px}
   .price-btn{grid-template-columns:88px minmax(0,1fr) auto auto;column-gap:28px;grid-template-areas:"num main cost more";align-items:center;width:calc(100% + 40px);margin-inline:-20px;padding:26px 20px}
   .price-cost{text-align:right;justify-self:end}
@@ -451,7 +454,7 @@ html.motion .price-btn>.price-more{opacity:0}
 .modal-title{font:300 clamp(34px,4vw,52px)/1.02 var(--serif);margin:0 40px 0 0}
 .modal-lead{margin-top:18px;color:var(--coffee)}
 .modal-highlight{margin-top:28px;padding:16px 18px;border:1px solid var(--gold);border-radius:14px}
-.modal-highlight span{display:block;font:500 10px/1.3 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:6px}
+.modal-highlight span{display:block;font:500 11px/1.3 var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:6px}
 .modal-group{margin-top:30px}
 .modal-group h3{font:500 11px/1.4 var(--sans);letter-spacing:.2em;text-transform:uppercase;color:var(--coffee);margin:0 0 12px}
 .modal-group li{position:relative;padding:9px 0 9px 22px;border-top:1px solid var(--line);font-size:15px;line-height:1.5}
@@ -478,7 +481,7 @@ html.motion .price-btn>.price-more{opacity:0}
 .studio-shot{flex:0 0 clamp(220px,62vw,300px);margin:0}
 @media (min-width:1024px){.studio-shot{flex-basis:clamp(260px,22vw,360px)}}
 .studio-shot .arch{aspect-ratio:3/4.4}
-.studio-shot figcaption{margin-top:14px;font:500 10.5px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--coffee)}
+.studio-shot figcaption{margin-top:14px;font:500 11px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--coffee)}
 /* компьютер в режиме анимаций: секция закрепляется, текст и лента фото едут по горизонтали;
    фото внутри арок смещаются медленнее рамки (параллакс) */
 @media (min-width:1024px){
@@ -526,7 +529,7 @@ html.motion .price-btn>.price-more{opacity:0}
 @media (min-width:1024px){.training-shot{flex-basis:calc((100% - 2*24px)/3)}}
 .training-shot .frame{aspect-ratio:3/4.3;border-radius:18px;overflow:hidden;background:#26221f}
 .training-shot img{width:100%;height:100%;object-fit:cover;object-position:50% 35%}
-.training-shot figcaption{margin-top:14px;font:500 10.5px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(250,247,242,.62)}
+.training-shot figcaption{margin-top:14px;font:500 11px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(250,247,242,.62)}
 .training-proof{margin-top:clamp(48px,6vw,80px);padding-top:28px;border-top:1px solid var(--line-dark);display:grid;gap:16px;justify-items:start}
 .training-proof p{max-width:60ch;color:rgba(250,247,242,.74)}
 .training-proof .eyebrow{margin:0}
@@ -542,6 +545,7 @@ html.motion .price-btn>.price-more{opacity:0}
 .accordion summary i::after{transform:rotate(90deg)}
 .accordion details[open] summary i{transform:rotate(45deg)}
 .acc-body{padding:0 0 26px;font-size:15px;line-height:1.65}
+.acc-body p{max-width:68ch}
 .acc-body p+p{margin-top:12px}
 .acc-body li{position:relative;padding:6px 0 6px 22px}
 .acc-body li::before{content:"";position:absolute;left:2px;top:1.05em;width:8px;height:1px;background:var(--gold)}
@@ -563,13 +567,13 @@ html.motion .price-btn>.price-more{opacity:0}
 .review-card p{font:400 clamp(20px,1.7vw,24px)/1.4 var(--serif)}
 .review-card footer{display:flex;flex-direction:column;gap:4px;padding-top:18px;border-top:1px solid var(--line)}
 .review-card strong{font-weight:500;font-size:15px}
-.review-card footer span{font:500 10.5px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--coffee)}
+.review-card footer span{font:500 11px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:var(--coffee)}
 .reviews-widget{display:grid;justify-items:center;gap:32px;margin-top:clamp(48px,6vw,80px)}
 .yandex-wrap{width:100%;max-width:820px;height:640px;border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--paper)}
 .yandex-wrap{position:relative}
 .yandex-wrap iframe{display:block;width:100%;height:100%;border:0}
 /* подпись-ссылка из кода виджета Яндекса — как на текущем сайте */
-.yandex-credit{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:10px;color:#b3b3b3;text-decoration:none}
+.yandex-credit{position:absolute;left:0;right:0;bottom:0;padding:10px 0;text-align:center;font-size:11px;color:var(--coffee);text-decoration:none}
 @media (max-width:767px){.yandex-wrap{height:560px}}
 
 /* ---------- 15. Частые вопросы ---------- */
@@ -610,6 +614,7 @@ html:not(.js) .booking-arch{border:1px solid #e9c98a;border-bottom:0;border-radi
 .footer-logo{width:96px;height:auto}
 .footer-nav{display:flex;flex-wrap:wrap;gap:12px 28px}
 .footer-nav a,.footer-meta a{text-decoration:none;transition:color .25s}
+@media (max-width:767px){.footer-nav{gap:0 24px}.footer-nav a{padding:11px 0}}
 @media (hover:hover){.footer-nav a:hover,.footer-meta a:hover{color:var(--milk)}}
 .footer-meta{display:grid;gap:8px}
 .footer-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line-dark);font-size:13px}
@@ -659,3 +664,7 @@ html.lenis,html.lenis body{height:auto}
   .btn::before,.btn span,.link-arrow span,.price-more,.price-more i,.price-row::after{transition:none}
   .price-visual b,.price-visual i,.price-cost{animation:none!important}
 }
+
+/* ---------- 23. Читаемость (по итогам автоматической проверки вёрстки) ---------- */
+/* основной текст на компьютере — 16px (на телефоне 15px) */
+@media (min-width:768px){.feature-list p,.acc-body,.points li,.modal-group li,.price-table,.review-card strong{font-size:16px}}
